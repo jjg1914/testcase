@@ -9,6 +9,10 @@ class TestInfo {
 
   TestInfo();
 
+  explicit TestInfo(const std::string &src);
+
+  operator std::string() const;
+
   int status() const;
 
   TestInfo status(int status_val) const;

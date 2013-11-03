@@ -1,6 +1,41 @@
+#include <sstream>
+
 #include "TestInfo.h"
 
 using namespace std;
+
+namespace {
+  string encode_string(const string &src)
+  {
+    stringstream in(src), out;
+    int c;
+    while (c = in.get(), !in.eof()) {
+      if (iscntrl(c) || c == '&') {
+        out << "&" << c << ";";
+      } else {
+        out.put(c);
+      }
+    }
+    return out.str();
+  }
+
+  string decode_string(const string &src)
+  {
+    stringstream in(src), out;
+    int c;
+    while (c = in.get(), !in.eof()) {
+      if (c == '&') {
+        stringstream val;
+        while (c = in.get(), c != ';') {
+          val.put(c);
+        }
+        val >> c;
+      }
+      out.put(c);
+    }
+    return out.str();
+  }
+}
 
 TestInfo::TestInfo()
   : status_val(0),
@@ -9,6 +44,42 @@ TestInfo::TestInfo()
     test_case_val(),
     suite_val()
 {}
+
+TestInfo::TestInfo(const string &src)
+{
+  stringstream ss(src);
+  string line;
+
+  while (getline(ss, line), !ss.eof()) {
+    size_t delim = line.find(':');
+    string attr = line.substr(0,delim);
+    string value = line.substr(delim + 1);
+    if (attr == "status") {
+      stringstream toi(value);
+      toi >> status_val;
+    } else if (attr == "filename") {
+      filename_val = decode_string(value);
+    } else if (attr == "lineno") {
+      stringstream toi(value);
+      toi >> lineno_val;
+    } else if (attr == "test_case") {
+      test_case_val = decode_string(value);
+    } else if (attr == "suite") {
+      suite_val = decode_string(value);
+    }
+  }
+}
+
+TestInfo::operator string() const
+{
+  stringstream ss;
+  ss << "status:" << status_val << endl;
+  ss << "filename:" << encode_string(filename_val) << endl;
+  ss << "lineno:" << lineno_val << endl;
+  ss << "test_case:" << encode_string(test_case_val) << endl;
+  ss << "suite:" << encode_string(suite_val) << endl;
+  return ss.str();
+}
 
 int TestInfo::status() const
 {
