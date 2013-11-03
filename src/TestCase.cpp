@@ -1,3 +1,4 @@
+#include <iostream>
 #include <unistd.h>
 #include <sys/wait.h>
 
@@ -31,24 +32,32 @@ namespace {
     abort();
   }
 
-  void test(const TestCase::AsyncCase &f) {
-    int pid, info = 0;
+  TestInfo test(const TestCase::AsyncCase &f) {
+    TestInfo rval;
+    int pid;
     if ((pid = fork())) {
+      int info = 0;
       waitpid(pid, &info, 0);
+      rval = rval.status(!info);
     } else {
       set_terminate(terminate_handler);
       async(f);
       quick_exit(0);
     }
+    return rval;
   }
 }
 
 TestCase::TestCase(const TestCase::AsyncCase &f)
-{
-  test(f);
-}
+  : result_val(test(f))
+{}
 
 TestCase::TestCase(const TestCase::SyncCase &f)
+  : result_val(test([&f](const Callback &cb){ f(), cb(); }))
 {
-  test([&f](const Callback &cb){ f(), cb(); });
+}
+
+const TestInfo &TestCase::result() const
+{
+  return result_val;
 }

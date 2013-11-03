@@ -3,6 +3,8 @@
 
 #include <functional>
 
+#include "TestInfo.h"
+
 class TestCase {
 
   public:
@@ -16,6 +18,12 @@ class TestCase {
   TestCase(const AsyncCase &f);
 
   TestCase(const SyncCase &f);
+
+  const TestInfo &result() const;
+
+  private:
+
+  TestInfo result_val;
 };
 
 #endif
