@@ -7,6 +7,7 @@
 #include <condition_variable>
 
 #include "ReportStream.h"
+#include "Assert.h"
 
 #include "TestCase.h"
 
@@ -38,9 +39,10 @@ namespace {
   {
     try {
       throw;
+    } catch (Assert::Error &e) {
+      report_stream << e.info().status(false);
     } catch (exception &e) {
-      TestInfo rval;
-      report_stream << rval.status(false).report(e.what());
+      report_stream << TestInfo().status(false).report(e.what());
     }
     abort();
   }
