@@ -13,9 +13,9 @@ class TestInfo {
 
   operator std::string() const;
 
-  int status() const;
+  bool status() const;
 
-  TestInfo status(int status_val) const;
+  TestInfo status(bool status_val) const;
 
   const std::string &filename() const;
 
@@ -27,15 +27,19 @@ class TestInfo {
 
   const std::string &test_case() const;
 
-  TestInfo test_case(const std::string &test_case) const;
+  TestInfo test_case(const std::string &test_case_val) const;
 
   const std::string &suite() const;
 
-  TestInfo suite(const std::string &suite) const;
+  TestInfo suite(const std::string &suite_val) const;
+
+  const std::string &report() const;
+
+  TestInfo report(const std::string &report_val) const;
 
   private:
 
-  int status_val;
+  bool status_val;
 
   std::string filename_val;
 
@@ -44,6 +48,8 @@ class TestInfo {
   std::string test_case_val;
 
   std::string suite_val;
+
+  std::string report_val;
 };
 
 #endif

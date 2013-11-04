@@ -42,10 +42,17 @@ TestInfo::TestInfo()
     filename_val(),
     lineno_val(0),
     test_case_val(),
-    suite_val()
+    suite_val(),
+    report_val()
 {}
 
 TestInfo::TestInfo(const string &src)
+  : status_val(0),
+    filename_val(),
+    lineno_val(0),
+    test_case_val(),
+    suite_val(),
+    report_val()
 {
   stringstream ss(src);
   string line;
@@ -66,6 +73,8 @@ TestInfo::TestInfo(const string &src)
       test_case_val = decode_string(value);
     } else if (attr == "suite") {
       suite_val = decode_string(value);
+    } else if (attr == "report") {
+      report_val = decode_string(value);
     }
   }
 }
@@ -78,15 +87,16 @@ TestInfo::operator string() const
   ss << "lineno:" << lineno_val << endl;
   ss << "test_case:" << encode_string(test_case_val) << endl;
   ss << "suite:" << encode_string(suite_val) << endl;
+  ss << "report:" << encode_string(report_val) << endl;
   return ss.str();
 }
 
-int TestInfo::status() const
+bool TestInfo::status() const
 {
   return status_val;
 }
 
-TestInfo TestInfo::status(int status_val) const
+TestInfo TestInfo::status(bool status_val) const
 {
   TestInfo rval(*this);
   rval.status_val = status_val;
@@ -138,5 +148,17 @@ TestInfo TestInfo::suite(const string &suite_val) const
 {
   TestInfo rval(*this);
   rval.suite_val = suite_val;
+  return rval;
+}
+
+const string &TestInfo::report() const
+{
+  return report_val;
+}
+
+TestInfo TestInfo::report(const string &report_val) const
+{
+  TestInfo rval(*this);
+  rval.report_val = report_val;
   return rval;
 }
