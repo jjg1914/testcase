@@ -1,16 +1,22 @@
 #include <iostream>
+#include <fstream>
 #include <unistd.h>
 #include <sys/wait.h>
 
 #include <mutex>
 #include <condition_variable>
 
+#include "ReportStream.h"
+
 #include "TestCase.h"
 
 using namespace std;
 
 namespace {
-  void async(const TestCase::AsyncCase &f) {
+  ReportStream report_stream;
+
+  void async(const TestCase::AsyncCase &f)
+  {
     bool done = false;;
     mutex done_mutex, wait_mutex;
     condition_variable condition;
@@ -28,20 +34,29 @@ namespace {
     });
   }
 
-  void terminate_handler() {
+  void terminate_handler()
+  {
+    try {
+      throw;
+    } catch (exception &e) {
+      TestInfo rval;
+      report_stream << rval.status(false).report(e.what());
+    }
     abort();
   }
 
-  TestInfo test(const TestCase::AsyncCase &f) {
+  TestInfo test(const TestCase::AsyncCase &f)
+  {
     TestInfo rval;
     int pid;
     if ((pid = fork())) {
       int info = 0;
       waitpid(pid, &info, 0);
-      rval = rval.status(!info);
+      report_stream >> rval;
     } else {
       set_terminate(terminate_handler);
       async(f);
+      report_stream << rval.status(true);
       quick_exit(0);
     }
     return rval;
