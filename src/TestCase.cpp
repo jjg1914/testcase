@@ -47,6 +47,18 @@ namespace {
     abort();
   }
 
+  void sigfpe_handler(int)
+  {
+    report_stream << TestInfo().status(false);
+    abort();
+  }
+
+  void sigsegv_handler(int)
+  {
+    report_stream << TestInfo().status(false);
+    abort();
+  }
+
   TestInfo test(const TestCase::AsyncCase &f)
   {
     TestInfo rval;
@@ -57,6 +69,8 @@ namespace {
       report_stream >> rval;
     } else {
       set_terminate(terminate_handler);
+      signal(SIGFPE,sigfpe_handler);
+      signal(SIGSEGV,sigsegv_handler);
       async(f);
       report_stream << rval.status(true);
       quick_exit(0);
