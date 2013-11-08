@@ -4,6 +4,7 @@
 #include <exception>
 #include <string>
 #include <regex>
+#include <sstream>
 
 #include "TestInfo.h"
 
@@ -32,7 +33,7 @@
   Assert::assert_greater_or_equal(expected,actual,__FILE__,__LINE__)
 
 #define ASSERT_MATCH(expected,actual)\
-  Assert::assert_match(std::regex(expected),actual,__FILE__,__LINE__)
+  Assert::assert_match(expected,actual,__FILE__,__LINE__)
 
 #define ASSERT_INSTANCE_OF(expected,actual)\
   Assert::assert_instance_of<expected>(actual,__FILE__,__LINE__)
@@ -86,7 +87,7 @@ class Assert {
   static void assert_greater_or_equal(const A &expected, const B &actual,
     const std::string &filename, int lineno);
 
-  static void assert_match(const std::regex &expected,
+  static void assert_match(const std::string &expected,
     const std::string &actual, const std::string &filename, int lineno);
 
   template<typename Expected, typename Actual>
@@ -103,7 +104,9 @@ void Assert::assert_same(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
   if (&expected != &actual) {
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno));
+    std::stringstream ss;
+    ss << "Failure: expected \"" << &actual << "\" to be the same as \"" << &expected << "\"";
+    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
   }
 }
 
@@ -111,8 +114,10 @@ template<typename A, typename B>
 void Assert::assert_equal(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
-  if (!(expected == actual)) {
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno));
+  if (!(actual == expected)) {
+    std::stringstream ss;
+    ss << "Failure: expected \"" << actual << "\" be equal to \"" << expected << "\"";
+    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
   }
 }
 
@@ -120,8 +125,10 @@ template<typename A, typename B>
 void Assert::assert_less(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
-  if (!(expected < actual)) {
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno));
+  if (!(actual < expected)) {
+    std::stringstream ss;
+    ss << "Failure: expected \"" << actual << "\" to be less than \"" << expected << "\"";
+    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
   }
 }
 
@@ -129,8 +136,10 @@ template<typename A, typename B>
 void Assert::assert_less_or_equal(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
-  if (!(expected <= actual)) {
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno));
+  if (!(actual <= expected)) {
+    std::stringstream ss;
+    ss << "Failure: expected \"" << actual << "\" to be less than or equal to \"" << expected << "\"";
+    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
   }
 }
 
@@ -138,8 +147,10 @@ template<typename A, typename B>
 void Assert::assert_greater(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
-  if (!(expected > actual)) {
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno));
+  if (!(actual > expected)) {
+    std::stringstream ss;
+    ss << "Failure: expected \"" << actual << "\" to be greater than \"" << expected << "\"";
+    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
   }
 }
 
@@ -147,8 +158,10 @@ template<typename A, typename B>
 void Assert::assert_greater_or_equal(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
-  if (!(expected >= actual)) {
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno));
+  if (!(actual >= expected)) {
+    std::stringstream ss;
+    ss << "Failure: expected \"" << actual << "\" to be greater than or equal to \"" << expected << "\"";
+    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
   }
 }
 
@@ -157,7 +170,9 @@ void Assert::assert_instance_of(const Actual &actual,
   const std::string &filename, int lineno)
 {
   if (!dynamic_cast<const Expected*>(actual)) {
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno));
+    std::stringstream ss;
+    ss << "Failure: expected \"" << typeid(actual).name() << "\" to be instance of \"" << typeid(Expected).name() << "\"";
+    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
   }
 }
 
@@ -166,14 +181,20 @@ template<typename Expected>
 void Assert::assert_exception(const std::function<void()> &f,
   const std::string &filename, int lineno)
 {
+  std::stringstream ss;
   try {
     f();
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno));
   } catch (Expected) {
-    /* ignore */
+    return;
+  } catch (std::exception &e) {
+    ss << "Failure: expected exception \""  << typeid(Expected).name() << "\", caught \"" << typeid(e).name()<< "\"";
+    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
   } catch(...) {
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno));
+    ss << "Failure: expected exception \""  << typeid(Expected).name() << "\", caught unknown";
+    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
   }
+  ss << "Failure: expected exception \""  << typeid(Expected).name() << "\", none thrown";
+  throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
 }
 
 #endif

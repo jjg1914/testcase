@@ -38,21 +38,25 @@ namespace {
 }
 
 TestInfo::TestInfo()
-  : status_val(0),
+  : status_val(FAILED),
     filename_val(),
     lineno_val(0),
     test_case_val(),
     suite_val(),
-    report_val()
+    backtrace_val(),
+    what_val(),
+    asserts_val(0)
 {}
 
 TestInfo::TestInfo(const string &src)
-  : status_val(0),
+  : status_val(FAILED),
     filename_val(),
     lineno_val(0),
     test_case_val(),
     suite_val(),
-    report_val()
+    backtrace_val(),
+    what_val(),
+    asserts_val(0)
 {
   stringstream ss(src);
   string line;
@@ -63,7 +67,7 @@ TestInfo::TestInfo(const string &src)
     string value = line.substr(delim + 1);
     if (attr == "status") {
       stringstream toi(value);
-      toi >> status_val;
+      toi >> *(int*)&status_val;
     } else if (attr == "filename") {
       filename_val = decode_string(value);
     } else if (attr == "lineno") {
@@ -73,8 +77,13 @@ TestInfo::TestInfo(const string &src)
       test_case_val = decode_string(value);
     } else if (attr == "suite") {
       suite_val = decode_string(value);
-    } else if (attr == "report") {
-      report_val = decode_string(value);
+    } else if (attr == "backtrace") {
+      backtrace_val = decode_string(value);
+    } else if (attr == "what") {
+      what_val = decode_string(value);
+    } else if (attr == "asserts") {
+      stringstream toi(value);
+      toi >> asserts_val;
     }
   }
 }
@@ -87,16 +96,18 @@ TestInfo::operator string() const
   ss << "lineno:" << lineno_val << endl;
   ss << "test_case:" << encode_string(test_case_val) << endl;
   ss << "suite:" << encode_string(suite_val) << endl;
-  ss << "report:" << encode_string(report_val) << endl;
+  ss << "backtrace:" << encode_string(backtrace_val) << endl;
+  ss << "what:" << encode_string(what_val) << endl;
+  ss << "asserts:" << asserts_val << endl;
   return ss.str();
 }
 
-bool TestInfo::status() const
+TestInfo::Status TestInfo::status() const
 {
   return status_val;
 }
 
-TestInfo TestInfo::status(bool status_val) const
+TestInfo TestInfo::status(TestInfo::Status status_val) const
 {
   TestInfo rval(*this);
   rval.status_val = status_val;
@@ -151,14 +162,38 @@ TestInfo TestInfo::suite(const string &suite_val) const
   return rval;
 }
 
-const string &TestInfo::report() const
+const string &TestInfo::backtrace() const
 {
-  return report_val;
+  return backtrace_val;
 }
 
-TestInfo TestInfo::report(const string &report_val) const
+TestInfo TestInfo::backtrace(const string &backtrace_val) const
 {
   TestInfo rval(*this);
-  rval.report_val = report_val;
+  rval.backtrace_val = backtrace_val;
+  return rval;
+}
+
+const string &TestInfo::what() const
+{
+  return what_val;
+}
+
+TestInfo TestInfo::what(const string &what_val) const
+{
+  TestInfo rval(*this);
+  rval.what_val = what_val;
+  return rval;
+}
+
+int TestInfo::asserts() const
+{
+  return asserts_val;
+}
+
+TestInfo TestInfo::asserts(int asserts_val) const
+{
+  TestInfo rval(*this);
+  rval.asserts_val = asserts_val;
   return rval;
 }

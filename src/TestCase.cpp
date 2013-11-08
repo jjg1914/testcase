@@ -1,3 +1,5 @@
+#include <execinfo.h>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -15,6 +17,19 @@ using namespace std;
 
 namespace {
   ReportStream report_stream;
+
+  string backtrace_str()
+  {
+    stringstream ss;
+    void *buf[32];
+    int size = backtrace((void**)&buf,32);
+    char **trace = backtrace_symbols(buf,size);
+    for (int i = 0; i < size; ++i) {
+      ss << trace[i] << endl;
+    }
+    free(trace);
+    return ss.str();
+  }
 
   void async(const TestCase::AsyncCase &f)
   {
@@ -40,22 +55,22 @@ namespace {
     try {
       throw;
     } catch (Assert::Error &e) {
-      report_stream << e.info().status(false);
+      report_stream << e.info().status(TestInfo::FAILED);
     } catch (exception &e) {
-      report_stream << TestInfo().status(false).report(e.what());
+      report_stream << TestInfo().status(TestInfo::ERROR).what(string("Exception: ") + e.what() + string(" (") +  typeid(e).name() + string(")"));
     }
     abort();
   }
 
   void sigfpe_handler(int)
   {
-    report_stream << TestInfo().status(false);
+    report_stream << TestInfo().status(TestInfo::ERROR).what("Error: Segmentation Fault").backtrace(backtrace_str());
     abort();
   }
 
   void sigsegv_handler(int)
   {
-    report_stream << TestInfo().status(false);
+    report_stream << TestInfo().status(TestInfo::ERROR).what("Error: Arithmetic Error");
     abort();
   }
 
@@ -72,7 +87,7 @@ namespace {
       signal(SIGFPE,sigfpe_handler);
       signal(SIGSEGV,sigsegv_handler);
       async(f);
-      report_stream << rval.status(true);
+      report_stream << rval.status(TestInfo::PASSED);
       quick_exit(0);
     }
     return rval;

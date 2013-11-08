@@ -14,12 +14,12 @@ void TestRunner::Text(ostream &o)
   o.flush();
   TestSuite::run([&o,&failures,&num_pass,&num_fails](const TestInfo& info){
     if (info.status()) {
-      o << "\e[32m.";
-      ++num_pass;
-    } else {
       o << "\e[31mF";
       ++num_fails;
       failures.push_back(info);
+    } else {
+      o << "\e[32m.";
+      ++num_pass;
     }
     o.flush();
   });
@@ -29,7 +29,12 @@ void TestRunner::Text(ostream &o)
   for (auto failure : failures) {
     cout << "\e[31m(" << i + 1 << "/" << num_fails << ") ";
     cout << failure.suite() << "::" << failure.test_case() << endl;
-    cout << "  \e[35m[" << failure.filename() << ":" << failure.lineno() << "]" << endl;
+    cout << "  \e[36m" << failure.what() << endl;
+    if (failure.status() == TestInfo::FAILED) {
+      cout << "  \e[35m[" << failure.filename() << ":" << failure.lineno() << "]" << endl;
+    } else {
+      cout << "\e[35m" << failure.backtrace();
+    }
     cout << endl;
     ++i;
   }

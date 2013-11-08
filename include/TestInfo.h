@@ -7,15 +7,21 @@ class TestInfo {
   
   public:
 
+  enum Status {
+    PASSED = 0,
+    FAILED,
+    ERROR
+  };
+
   TestInfo();
 
   explicit TestInfo(const std::string &src);
 
   operator std::string() const;
 
-  bool status() const;
+  Status status() const;
 
-  TestInfo status(bool status_val) const;
+  TestInfo status(Status status_val) const;
 
   const std::string &filename() const;
 
@@ -33,13 +39,21 @@ class TestInfo {
 
   TestInfo suite(const std::string &suite_val) const;
 
-  const std::string &report() const;
+  const std::string &backtrace() const;
 
-  TestInfo report(const std::string &report_val) const;
+  TestInfo backtrace(const std::string &backtrace_val) const;
+
+  const std::string &what() const;
+
+  TestInfo what(const std::string &what_val) const;
+
+  int asserts() const;
+
+  TestInfo asserts(int asserts_val) const;
 
   private:
 
-  bool status_val;
+  Status status_val;
 
   std::string filename_val;
 
@@ -49,7 +63,11 @@ class TestInfo {
 
   std::string suite_val;
 
-  std::string report_val;
+  std::string backtrace_val;
+
+  std::string what_val;
+
+  int asserts_val;
 };
 
 #endif
