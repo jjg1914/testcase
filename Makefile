@@ -33,7 +33,7 @@ PACKAGES =
 EXTRA = .gitignore
 
 # Other libaries
-LDLIBS =
+LDLIBS = -ldl
 
 # assembler
 AS = as
@@ -61,7 +61,7 @@ CFLAGS = -g -Wall -Wextra -Werror
 # c++ flags
 CXXFLAGS = $(CFLAGS)
 # linking flags
-LDFLAGS = -pthread
+LDFLAGS = -pthread -rdynamic
 
 # END OPTIONS
 

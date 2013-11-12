@@ -1,4 +1,6 @@
 #include <execinfo.h>
+#include <dlfcn.h>
+#include <cxxabi.h>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -18,6 +20,8 @@ using namespace std;
 namespace {
   ReportStream report_stream;
 
+  void async(const TestCase::AsyncCase &f);
+
   string backtrace_str()
   {
     stringstream ss;
@@ -25,7 +29,17 @@ namespace {
     int size = backtrace((void**)&buf,32);
     char **trace = backtrace_symbols(buf,size);
     for (int i = 0; i < size; ++i) {
-      ss << trace[i] << endl;
+      Dl_info info;
+      if (dladdr(buf[i], &info) && info.dli_sname) {
+        char *demangled = NULL;
+        int status = -1;
+        if (info.dli_sname[0] == '_') {
+          demangled = abi::__cxa_demangle(info.dli_sname, NULL, 0, &status);
+        }
+        ss << (status ? (info.dli_sname ? info.dli_sname : trace[i]) : demangled) << endl;
+      } else {
+        ss << trace[i] << endl;
+      }
     }
     free(trace);
     return ss.str();
@@ -57,7 +71,7 @@ namespace {
     } catch (Assert::Error &e) {
       report_stream << e.info().status(TestInfo::FAILED);
     } catch (exception &e) {
-      report_stream << TestInfo().status(TestInfo::ERROR).what(string("Exception: ") + e.what() + string(" (") +  typeid(e).name() + string(")"));
+      report_stream << TestInfo().status(TestInfo::ERROR).what(string("Exception: ") + e.what() + string(" (") +  typeid(e).name() + string(")")).backtrace(backtrace_str());
     }
     abort();
   }
@@ -70,7 +84,7 @@ namespace {
 
   void sigsegv_handler(int)
   {
-    report_stream << TestInfo().status(TestInfo::ERROR).what("Error: Arithmetic Error");
+    report_stream << TestInfo().status(TestInfo::ERROR).what("Error: Arithmetic Error").backtrace(backtrace_str());
     abort();
   }
 
