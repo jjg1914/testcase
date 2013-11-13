@@ -8,6 +8,7 @@
 #include <condition_variable>
 
 #include "backtrace.h"
+#include "handler.h"
 #include "ReportStream.h"
 #include "Assert.h"
 
@@ -16,8 +17,6 @@
 using namespace std;
 
 namespace {
-  ReportStream report_stream;
-
   void async(const TestCase::AsyncCase &f)
   {
     bool done = false;;
@@ -37,44 +36,19 @@ namespace {
     });
   }
 
-  void terminate_handler()
-  {
-    try {
-      throw;
-    } catch (Assert::Error &e) {
-      report_stream << e.info().status(TestInfo::FAILED);
-    } catch (exception &e) {
-      report_stream << TestInfo().status(TestInfo::ERROR).what(string("Exception: ") + e.what() + string(" (") +  typeid(e).name() + string(")")).backtrace(sbacktrace());
-    }
-    abort();
-  }
-
-  void sigfpe_handler(int)
-  {
-    report_stream << TestInfo().status(TestInfo::ERROR).what("Error: Segmentation Fault").backtrace(sbacktrace());
-    abort();
-  }
-
-  void sigsegv_handler(int)
-  {
-    report_stream << TestInfo().status(TestInfo::ERROR).what("Error: Arithmetic Error").backtrace(sbacktrace());
-    abort();
-  }
-
   TestInfo test(const TestCase::AsyncCase &f)
   {
     TestInfo rval;
+    ReportStream rs;
     int pid;
     if ((pid = fork())) {
       int info = 0;
       waitpid(pid, &info, 0);
-      report_stream >> rval;
+      rs >> rval;
     } else {
-      set_terminate(terminate_handler);
-      signal(SIGFPE,sigfpe_handler);
-      signal(SIGSEGV,sigsegv_handler);
+      handler_install(&rs);
       async(f);
-      report_stream << rval.status(TestInfo::PASSED);
+      rs << rval.status(TestInfo::PASSED);
       quick_exit(0);
     }
     return rval;
