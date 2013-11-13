@@ -10,6 +10,26 @@ using namespace std;
 struct A { virtual ~A() {}; } a;
 struct B : public A { virtual ~B() {}; } b;
 
+int throw_sigfpe(int a,int b)
+{
+  return a/b;
+}
+
+int throw_sigseg(int *i)
+{
+  return *i;
+}
+
+void throw_logic_error()
+{
+  throw logic_error("logic error");
+}
+
+void throw_int()
+{
+  throw 1;
+}
+
 int main() {
   TestSuite suite("test suite", [](const TestCase &test) {
     A a;
@@ -68,18 +88,15 @@ int main() {
     test("test 13", []{ASSERT_TRUE(true);});
 
     test("test 14", []{
-      int a = 2, b = 1;
-      int c = a / --b;
-      cout << c << endl;
+      throw_sigfpe(0,0);
     });
 
     test("test 15", []{
-      int *i = NULL;
-      cout << *i << endl;
+      throw_sigseg(NULL);
     });
 
     test("test 16", []{
-      throw logic_error("logic error");
+      throw_logic_error();
     });
 
     test("test 17", []{
@@ -88,6 +105,9 @@ int main() {
       });
     });
 
+    test("test 18", []{
+      throw_int();
+    });
   });
 
   TestRunner::Text();

@@ -19,20 +19,25 @@ namespace {
       (*report_stream) << e.info();
     } catch (exception &e) {
       (*report_stream) << TestInfo::error(string(e.what()) + " (" + typeid(e).name() + ")")
-        .backtrace(sbacktrace());
+        .backtrace(sbacktrace(5,18));
+    } catch (...) {
+      (*report_stream) << TestInfo::error("unknown")
+        .backtrace(sbacktrace(5,18));
     }
     abort();
   }
 
   void handle_sigfpe(int)
   {
-    (*report_stream) << TestInfo::error("Arithmetic Error").backtrace(sbacktrace());
+    (*report_stream) << TestInfo::error("Arithmetic Error")
+      .backtrace(sbacktrace(3,18));
     abort();
   }
 
   void handle_sigsegv(int)
   {
-    (*report_stream) << TestInfo::error("Segmentation Fault").backtrace(sbacktrace());
+    (*report_stream) << TestInfo::error("Segmentation Fault")
+      .backtrace(sbacktrace(3,18));
     abort();
   }
 }

@@ -1,4 +1,5 @@
 #include <vector>
+#include <sstream>
 
 #include "TestSuite.h"
 
@@ -33,7 +34,11 @@ void TestRunner::Text(ostream &o)
     if (failure.status() == TestInfo::FAILED) {
       cout << "  \e[35m[" << failure.filename() << ":" << failure.lineno() << "]" << endl;
     } else {
-      cout << "\e[35m" << failure.backtrace();
+      stringstream ss(failure.backtrace());
+      string line;
+      while (getline(ss,line)) {
+        cout << "  \e[35m" << line << endl;;
+      }
     }
     cout << endl;
     ++i;

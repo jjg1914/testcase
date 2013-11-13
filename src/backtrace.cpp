@@ -9,13 +9,13 @@
 
 using namespace std;
 
-std::string sbacktrace()
+std::string sbacktrace(int bottom_offset, int top_offset)
 {
   stringstream ss;
   void *buf[32];
   int size = backtrace((void**)&buf,32);
   char **trace = backtrace_symbols(buf,size);
-  for (int i = 0; i < size; ++i) {
+  for (int i = bottom_offset; i < size - top_offset; ++i) {
     Dl_info info;
     if (dladdr(buf[i], &info) && info.dli_sname) {
       char *demangled = NULL;

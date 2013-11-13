@@ -192,7 +192,7 @@ void Assert::assert_exception(const std::function<void()> &f,
   } catch(...) {
     ss << "expected exception \""  << typeid(Expected).name() << "\", caught unknown";
   }
-    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
 }
 
 #endif
