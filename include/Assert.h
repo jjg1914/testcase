@@ -105,8 +105,8 @@ void Assert::assert_same(const A &expected, const B &actual,
 {
   if (&expected != &actual) {
     std::stringstream ss;
-    ss << "Failure: expected \"" << &actual << "\" to be the same as \"" << &expected << "\"";
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    ss << "expected \"" << &actual << "\" to be the same as \"" << &expected << "\"";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }
 
@@ -116,8 +116,8 @@ void Assert::assert_equal(const A &expected, const B &actual,
 {
   if (!(actual == expected)) {
     std::stringstream ss;
-    ss << "Failure: expected \"" << actual << "\" be equal to \"" << expected << "\"";
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    ss << "expected \"" << actual << "\" be equal to \"" << expected << "\"";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }
 
@@ -127,8 +127,8 @@ void Assert::assert_less(const A &expected, const B &actual,
 {
   if (!(actual < expected)) {
     std::stringstream ss;
-    ss << "Failure: expected \"" << actual << "\" to be less than \"" << expected << "\"";
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    ss << "expected \"" << actual << "\" to be less than \"" << expected << "\"";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }
 
@@ -138,8 +138,8 @@ void Assert::assert_less_or_equal(const A &expected, const B &actual,
 {
   if (!(actual <= expected)) {
     std::stringstream ss;
-    ss << "Failure: expected \"" << actual << "\" to be less than or equal to \"" << expected << "\"";
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    ss << "expected \"" << actual << "\" to be less than or equal to \"" << expected << "\"";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }
 
@@ -149,8 +149,8 @@ void Assert::assert_greater(const A &expected, const B &actual,
 {
   if (!(actual > expected)) {
     std::stringstream ss;
-    ss << "Failure: expected \"" << actual << "\" to be greater than \"" << expected << "\"";
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    ss << "expected \"" << actual << "\" to be greater than \"" << expected << "\"";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }
 
@@ -160,8 +160,8 @@ void Assert::assert_greater_or_equal(const A &expected, const B &actual,
 {
   if (!(actual >= expected)) {
     std::stringstream ss;
-    ss << "Failure: expected \"" << actual << "\" to be greater than or equal to \"" << expected << "\"";
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    ss << "expected \"" << actual << "\" to be greater than or equal to \"" << expected << "\"";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }
 
@@ -171,8 +171,8 @@ void Assert::assert_instance_of(const Actual &actual,
 {
   if (!dynamic_cast<const Expected*>(actual)) {
     std::stringstream ss;
-    ss << "Failure: expected \"" << typeid(actual).name() << "\" to be instance of \"" << typeid(Expected).name() << "\"";
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    ss << "expected \"" << typeid(actual).name() << "\" to be instance of \"" << typeid(Expected).name() << "\"";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }
 
@@ -184,17 +184,15 @@ void Assert::assert_exception(const std::function<void()> &f,
   std::stringstream ss;
   try {
     f();
+    ss << "expected exception \""  << typeid(Expected).name() << "\", none thrown";
   } catch (Expected) {
     return;
   } catch (std::exception &e) {
-    ss << "Failure: expected exception \""  << typeid(Expected).name() << "\", caught \"" << typeid(e).name()<< "\"";
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    ss << "expected exception \""  << typeid(Expected).name() << "\", caught \"" << typeid(e).name()<< "\"";
   } catch(...) {
-    ss << "Failure: expected exception \""  << typeid(Expected).name() << "\", caught unknown";
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    ss << "expected exception \""  << typeid(Expected).name() << "\", caught unknown";
   }
-  ss << "Failure: expected exception \""  << typeid(Expected).name() << "\", none thrown";
-  throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
 }
 
 #endif

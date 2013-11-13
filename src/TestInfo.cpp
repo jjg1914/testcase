@@ -37,6 +37,25 @@ namespace {
   }
 }
 
+TestInfo TestInfo::passed()
+{
+  return TestInfo().status(PASSED);
+}
+
+TestInfo TestInfo::failed(const std::string &what, const std::string &file, int line)
+{
+  return TestInfo().status(FAILED)
+    .what(string("Failure: ") + what)
+    .filename(file)
+    .lineno(line);
+}
+
+TestInfo TestInfo::error(const std::string &what)
+{
+  return TestInfo().status(ERROR)
+    .what(string("Error: ") + what);
+}
+
 TestInfo::TestInfo()
   : status_val(FAILED),
     filename_val(),
@@ -48,16 +67,9 @@ TestInfo::TestInfo()
     asserts_val(0)
 {}
 
-TestInfo::TestInfo(const string &src)
-  : status_val(FAILED),
-    filename_val(),
-    lineno_val(0),
-    test_case_val(),
-    suite_val(),
-    backtrace_val(),
-    what_val(),
-    asserts_val(0)
+TestInfo TestInfo::deserialize(const string &src)
 {
+  TestInfo info;
   stringstream ss(src);
   string line;
 
@@ -67,28 +79,30 @@ TestInfo::TestInfo(const string &src)
     string value = line.substr(delim + 1);
     if (attr == "status") {
       stringstream toi(value);
-      toi >> *(int*)&status_val;
+      toi >> *(int*)&info.status_val;
     } else if (attr == "filename") {
-      filename_val = decode_string(value);
+      info.filename_val = decode_string(value);
     } else if (attr == "lineno") {
       stringstream toi(value);
-      toi >> lineno_val;
+      toi >> info.lineno_val;
     } else if (attr == "test_case") {
-      test_case_val = decode_string(value);
+      info.test_case_val = decode_string(value);
     } else if (attr == "suite") {
-      suite_val = decode_string(value);
+      info.suite_val = decode_string(value);
     } else if (attr == "backtrace") {
-      backtrace_val = decode_string(value);
+      info.backtrace_val = decode_string(value);
     } else if (attr == "what") {
-      what_val = decode_string(value);
+      info.what_val = decode_string(value);
     } else if (attr == "asserts") {
       stringstream toi(value);
-      toi >> asserts_val;
+      toi >> info.asserts_val;
     }
   }
+
+  return info;
 }
 
-TestInfo::operator string() const
+string TestInfo::serialize() const
 {
   stringstream ss;
   ss << "status:" << status_val << endl;

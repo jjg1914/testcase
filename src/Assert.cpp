@@ -13,14 +13,14 @@ TestInfo Assert::Error::info() const noexcept
 
 void Assert::assert_fail(const string &filename, int lineno)
 {
-  throw Assert::Error(TestInfo().what("Failure: failed").filename(filename).lineno(lineno));
+  throw Assert::Error(TestInfo::failed("failed", filename, lineno));
 }
 
 void Assert::assert_true(bool cond, const string &expr,
   const string &filename, int lineno)
 {
   if (!cond) {
-    throw Assert::Error(TestInfo().what("Failure: " + expr).filename(filename).lineno(lineno));
+    throw Assert::Error(TestInfo::failed(expr, filename, lineno));
   }
 }
 
@@ -29,7 +29,7 @@ void Assert::assert_match(const string &expected, const string &actual,
 {
   if (!regex_match(actual, regex(expected))) {
     stringstream ss;
-    ss << "Failure: expected \"" << actual << "\" to match /" << expected << "/";
-    throw Assert::Error(TestInfo().filename(filename).lineno(lineno).what(ss.str()));
+    ss << "expected \"" << actual << "\" to match /" << expected << "/";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }

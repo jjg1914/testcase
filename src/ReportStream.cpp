@@ -22,7 +22,7 @@ ReportStream::_pipe::_pipe()
 
 ReportStream &ReportStream::operator<<(const TestInfo &info)
 {
-  out << (string) info << endl;
+  out << info.serialize() << endl;
   return *this;
 }
 
@@ -32,6 +32,6 @@ ReportStream &ReportStream::operator>>(TestInfo &info)
   while (getline(in, line), !in.eof() && line != "") {
     buf += line + "\n";
   }
-  info = TestInfo(buf);
+  info = TestInfo::deserialize(buf);
   return *this;
 }

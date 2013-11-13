@@ -16,22 +16,23 @@ namespace {
     try {
       throw;
     } catch (Assert::Error &e) {
-      (*report_stream) << e.info().status(TestInfo::FAILED);
+      (*report_stream) << e.info();
     } catch (exception &e) {
-      (*report_stream) << TestInfo().status(TestInfo::ERROR).what(string("Exception: ") + e.what() + string(" (") +  typeid(e).name() + string(")")).backtrace(sbacktrace());
+      (*report_stream) << TestInfo::error(string(e.what()) + " (" + typeid(e).name() + ")")
+        .backtrace(sbacktrace());
     }
     abort();
   }
 
   void handle_sigfpe(int)
   {
-    (*report_stream) << TestInfo().status(TestInfo::ERROR).what("Error: Segmentation Fault").backtrace(sbacktrace());
+    (*report_stream) << TestInfo::error("Arithmetic Error").backtrace(sbacktrace());
     abort();
   }
 
   void handle_sigsegv(int)
   {
-    (*report_stream) << TestInfo().status(TestInfo::ERROR).what("Error: Arithmetic Error").backtrace(sbacktrace());
+    (*report_stream) << TestInfo::error("Segmentation Fault").backtrace(sbacktrace());
     abort();
   }
 }
