@@ -11,7 +11,7 @@ struct A { virtual ~A() {}; } a;
 struct B : public A { virtual ~B() {}; } b;
 
 int main() {
-  TestSuite suite("test suite", [](const TestSuite::Test &test) {
+  TestSuite suite("test suite", [](const TestCase &test) {
     A a;
     B b;
 

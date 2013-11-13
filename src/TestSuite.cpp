@@ -3,26 +3,15 @@
 
 using namespace std;
 
-void TestSuite::Test::operator()(const string &name,
-  const TestCase::AsyncCase &f) const
-{
-  callback(name, f);
-}
+std::list<const TestSuite*> TestSuite::suites;
 
-void TestSuite::Test::operator()(const string &name,
-  const TestCase::SyncCase &f) const
-{
-  callback(name, f);
-}
-
-TestSuite::Test::Test(const Callback &callback)
-  : callback(callback)
-{}
-
-void TestSuite::run(const TestSuite::Runner &f)
+void TestSuite::run(const TestCase::Runner &f)
 {
   for (auto suite : suites) {
-    suite->run_suite(f);
+    TestCase test([&suite,&f](const TestInfo &info){
+      f(info.suite(suite->name));
+    });
+    suite->suite(test);
   }
 }
 
@@ -56,14 +45,4 @@ TestSuite &TestSuite::operator=(const TestSuite &src)
     suite = src.suite;
   }
   return *this;
-}
-
-std::list<const TestSuite*> TestSuite::suites;
-
-void TestSuite::run_suite(const Runner &runner) const
-{
-  Test test([this,&runner](const string& name, const TestCase &f){
-    runner(f.result().test_case(name).suite(this->name));
-  });
-  suite(test);
 }

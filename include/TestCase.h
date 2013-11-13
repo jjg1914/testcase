@@ -15,15 +15,17 @@ class TestCase {
 
   typedef std::function<void()> SyncCase;
 
-  TestCase(const AsyncCase &f);
+  typedef std::function<void(const TestInfo&)> Runner;
 
-  TestCase(const SyncCase &f);
+  TestCase(const Runner &f);
 
-  const TestInfo &result() const;
+  void operator()(const std::string &name, const AsyncCase &f) const;
+
+  void operator()(const std::string &name, const SyncCase &f) const;
 
   private:
 
-  TestInfo result_val;
+  Runner runner;
 };
 
 #endif
