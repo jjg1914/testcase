@@ -36,7 +36,7 @@ int main() {
     B b;
 
     test("test 1", []{
-      ASSERT_FAIL();
+      ASSERT_FAIL("always flunk");
     });
 
     test("test 2", []{
@@ -107,6 +107,32 @@ int main() {
 
     test("test 18", []{
       throw_int();
+    });
+
+    test("test 19", []{
+      ASSERT_FALSE(2 == 2);
+    });
+
+    test("test 20", [&a]{
+      ASSERT_NOT_SAME(a, a);
+    });
+
+    test("test 21", [&a]{
+      ASSERT_NOT_EQUAL(2, 2);
+    });
+
+    test("test 22", []{
+      ASSERT_NOT_MATCH("a*b", "aaab");
+    });
+
+    test("test 23", [a]{
+      ASSERT_NOT_INSTANCE_OF(A, &a);
+    });
+
+    test("test 24", []{
+      ASSERT_NO_EXCEPTION([]{
+        throw logic_error("logic error");
+      });
     });
   });
 

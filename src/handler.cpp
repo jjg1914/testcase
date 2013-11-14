@@ -18,10 +18,10 @@ namespace {
     } catch (Assert::Error &e) {
       (*report_stream) << e.info();
     } catch (exception &e) {
-      (*report_stream) << TestInfo::error(string(e.what()) + " (" + typeid(e).name() + ")")
+      (*report_stream) << TestInfo::error(string(e.what()) + " (" + demangle(typeid(e)) + ")")
         .backtrace(sbacktrace(5,18));
     } catch (...) {
-      (*report_stream) << TestInfo::error("unknown")
+      (*report_stream) << TestInfo::error("unknown exception")
         .backtrace(sbacktrace(5,18));
     }
     abort();

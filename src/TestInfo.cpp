@@ -45,15 +45,14 @@ TestInfo TestInfo::passed()
 TestInfo TestInfo::failed(const std::string &what, const std::string &file, int line)
 {
   return TestInfo().status(FAILED)
-    .what(string("Failure: ") + what)
+    .what(what)
     .filename(file)
     .lineno(line);
 }
 
 TestInfo TestInfo::error(const std::string &what)
 {
-  return TestInfo().status(ERROR)
-    .what(string("Error: ") + what);
+  return TestInfo().status(ERROR).what(what);
 }
 
 TestInfo::TestInfo()

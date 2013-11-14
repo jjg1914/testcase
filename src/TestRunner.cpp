@@ -10,13 +10,18 @@ using namespace std;
 void TestRunner::Text(ostream &o)
 {
   vector<TestInfo> failures;
-  int num_fails = 0, num_pass = 0;
+  int num_fails = 0, num_pass = 0, num_errors = 0;
   o << "\e[1m";
   o.flush();
-  TestSuite::run([&o,&failures,&num_pass,&num_fails](const TestInfo& info){
+  TestSuite::run([&o,&failures,&num_pass,&num_fails,&num_errors](const TestInfo& info){
     if (info.status()) {
-      o << "\e[31mF";
-      ++num_fails;
+      if (info.status() == TestInfo::FAILED) {
+        o << "\e[31mF";
+        ++num_fails;
+      } else {
+        o << "\e[36mE";
+        ++num_errors;
+      }
       failures.push_back(info);
     } else {
       o << "\e[32m.";
@@ -28,21 +33,31 @@ void TestRunner::Text(ostream &o)
 
   int i = 0;
   for (auto failure : failures) {
-    cout << "\e[31m(" << i + 1 << "/" << num_fails << ") ";
-    cout << failure.suite() << "::" << failure.test_case() << endl;
-    cout << "  \e[36m" << failure.what() << endl;
+    o << "\e[31m(" << i + 1 << "/" << failures.size() << ") ";
+    o << failure.suite() << "::" << failure.test_case() << endl;
+    o << "  \e[36m";
     if (failure.status() == TestInfo::FAILED) {
-      cout << "  \e[35m[" << failure.filename() << ":" << failure.lineno() << "]" << endl;
+      o << "Failure: ";
+    } else {
+      o << "Error: ";
+    }
+    o << failure.what() << endl;
+    if (failure.status() == TestInfo::FAILED) {
+      o << "  \e[35m[" << failure.filename() << ":";
+      o << failure.lineno() << "]" << endl;
     } else {
       stringstream ss(failure.backtrace());
       string line;
       while (getline(ss,line)) {
-        cout << "  \e[35m" << line << endl;;
+        o << "  \e[35m" << line << endl;;
       }
     }
-    cout << endl;
+    o << endl;
     ++i;
   }
 
-  cout << "\e[36m" << num_fails + num_pass << " test, \e[31m" << num_fails << " failures\e[0m" << endl;
+  o << "\e[35m" << num_fails + num_pass << " test, ";
+  o << "\e[31m" << num_fails << " failures, ";
+  o << "\e[36m" << num_errors << " errors";
+  o << "\e[0m" << endl;
 }

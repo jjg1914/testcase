@@ -4,6 +4,7 @@
 #include <cstdlib>
 
 #include <sstream>
+#include <memory>
 
 #include "backtrace.h"
 
@@ -30,4 +31,15 @@ std::string sbacktrace(int bottom_offset, int top_offset)
   }
   free(trace);
   return ss.str();
+}
+
+string demangle(const type_info &info)
+{
+  int status;
+  unique_ptr<char> realname(abi::__cxa_demangle(info.name(), 0, 0, &status));
+  if (status) {
+    return info.name();
+  } else {
+    return realname.get();
+  }
 }
