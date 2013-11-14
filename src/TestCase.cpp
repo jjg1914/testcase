@@ -17,7 +17,7 @@ void TestCase::operator()(const string &name, const AsyncCase &f) const
   synchronize_on_fork([&f,&rs](){
     handler_install(&rs);
     synchronize(f);
-    rs << TestInfo().status(TestInfo::PASSED);
+    rs << TestInfo::passed();
   });
 
   TestInfo rval;

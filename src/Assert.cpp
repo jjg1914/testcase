@@ -2,6 +2,13 @@
 
 using namespace std;
 
+int Assert::num_asserts_val = 0;
+
+int Assert::num_asserts()
+{
+  return num_asserts_val;
+}
+
 Assert::Error::Error(const TestInfo &info_val) noexcept
   : info_val(info_val)
 {}
@@ -14,12 +21,14 @@ TestInfo Assert::Error::info() const noexcept
 void Assert::assert_fail(const string message, const string &filename,
   int lineno)
 {
+  ++num_asserts_val;
   throw Assert::Error(TestInfo::failed(message, filename, lineno));
 }
 
 void Assert::assert_true(bool cond, const string &expr,
   const string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (!cond) {
     stringstream ss;
     ss << "expected true (" << expr << ")";
@@ -30,6 +39,7 @@ void Assert::assert_true(bool cond, const string &expr,
 void Assert::assert_false(bool cond, const string &expr,
   const string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (cond) {
     stringstream ss;
     ss << "expected false (" << expr << ")";
@@ -40,6 +50,7 @@ void Assert::assert_false(bool cond, const string &expr,
 void Assert::assert_match(const string &expected, const string &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (!regex_match(actual, regex(expected))) {
     stringstream ss;
     ss << "expected \"" << actual << "\" to match /" << expected << "/";
@@ -50,6 +61,7 @@ void Assert::assert_match(const string &expected, const string &actual,
 void Assert::assert_not_match(const string &expected, const string &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (regex_match(actual, regex(expected))) {
     stringstream ss;
     ss << "expected \"" << actual << "\" to not match /" << expected << "/";
@@ -60,6 +72,7 @@ void Assert::assert_not_match(const string &expected, const string &actual,
 void Assert::assert_no_exception(const std::function<void()> &f,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   std::stringstream ss;
   try {
     f();

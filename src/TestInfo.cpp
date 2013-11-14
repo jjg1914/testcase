@@ -1,5 +1,7 @@
 #include <sstream>
 
+#include "Assert.h"
+
 #include "TestInfo.h"
 
 using namespace std;
@@ -39,7 +41,7 @@ namespace {
 
 TestInfo TestInfo::passed()
 {
-  return TestInfo().status(PASSED);
+  return TestInfo().status(PASSED).asserts(Assert::num_asserts());
 }
 
 TestInfo TestInfo::failed(const std::string &what, const std::string &file, int line)
@@ -47,12 +49,13 @@ TestInfo TestInfo::failed(const std::string &what, const std::string &file, int 
   return TestInfo().status(FAILED)
     .what(what)
     .filename(file)
-    .lineno(line);
+    .lineno(line)
+    .asserts(Assert::num_asserts());
 }
 
 TestInfo TestInfo::error(const std::string &what)
 {
-  return TestInfo().status(ERROR).what(what);
+  return TestInfo().status(ERROR).what(what).asserts(Assert::num_asserts());
 }
 
 TestInfo::TestInfo()

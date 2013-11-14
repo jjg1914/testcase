@@ -138,12 +138,19 @@ class Assert {
 
   static void assert_no_exception(const std::function<void()> &f,
     const std::string &filename, int lineno);
+
+  static int num_asserts();
+
+  private:
+
+  static int num_asserts_val;
 };
 
 template<typename A, typename B>
 void Assert::assert_same(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (&expected != &actual) {
     std::stringstream ss;
     ss << "expected \"" << &actual;
@@ -156,6 +163,7 @@ template<typename A, typename B>
 void Assert::assert_not_same(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (&expected == &actual) {
     std::stringstream ss;
     ss << "expected \"" << &actual;
@@ -168,6 +176,7 @@ template<typename A, typename B>
 void Assert::assert_equal(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (!(actual == expected)) {
     std::stringstream ss;
     ss << "expected \"" << actual;
@@ -180,6 +189,7 @@ template<typename A, typename B>
 void Assert::assert_not_equal(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (!(actual != expected)) {
     std::stringstream ss;
     ss << "expected \"" << actual;
@@ -192,6 +202,7 @@ template<typename A, typename B>
 void Assert::assert_less(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (!(actual < expected)) {
     std::stringstream ss;
     ss << "expected \"" << actual;
@@ -204,6 +215,7 @@ template<typename A, typename B>
 void Assert::assert_less_or_equal(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (!(actual <= expected)) {
     std::stringstream ss;
     ss << "expected \"" << actual;
@@ -216,6 +228,7 @@ template<typename A, typename B>
 void Assert::assert_greater(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (!(actual > expected)) {
     std::stringstream ss;
     ss << "expected \"" << actual;
@@ -228,6 +241,7 @@ template<typename A, typename B>
 void Assert::assert_greater_or_equal(const A &expected, const B &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (!(actual >= expected)) {
     std::stringstream ss;
     ss << "expected \"" << actual;
@@ -240,6 +254,7 @@ template<typename Expected, typename Actual>
 void Assert::assert_instance_of(const Actual &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (!dynamic_cast<const Expected*>(actual)) {
     std::stringstream ss;
     ss << "expected \"" << demangle(typeid(*actual));
@@ -252,6 +267,7 @@ template<typename Expected, typename Actual>
 void Assert::assert_not_instance_of(const Actual &actual,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   if (dynamic_cast<const Expected*>(actual)) {
     std::stringstream ss;
     ss << "expected \"" << demangle(typeid(*actual));
@@ -264,6 +280,7 @@ template<typename Expected>
 void Assert::assert_exception(const std::function<void()> &f,
   const std::string &filename, int lineno)
 {
+  ++num_asserts_val;
   std::stringstream ss;
   ss << "expected exception \""  << demangle(typeid(Expected)) << "\", ";
   try {

@@ -10,23 +10,31 @@ using namespace std;
 void TestRunner::Text(ostream &o)
 {
   vector<TestInfo> failures;
-  int num_fails = 0, num_pass = 0, num_errors = 0;
+  struct {
+    int num_tests;
+    int num_fails;
+    int num_passes;
+    int num_errors;
+    int num_asserts;
+  } counts = { 0, 0, 0, 0 ,0 };
   o << "\e[1m";
   o.flush();
-  TestSuite::run([&o,&failures,&num_pass,&num_fails,&num_errors](const TestInfo& info){
+  TestSuite::run([&o,&failures,&counts](const TestInfo& info){
+    ++counts.num_tests;
     if (info.status()) {
       if (info.status() == TestInfo::FAILED) {
         o << "\e[31mF";
-        ++num_fails;
+        ++counts.num_fails;
       } else {
         o << "\e[36mE";
-        ++num_errors;
+        ++counts.num_errors;
       }
       failures.push_back(info);
     } else {
       o << "\e[32m.";
-      ++num_pass;
+      ++counts.num_passes;
     }
+    counts.num_asserts += info.asserts();
     o.flush();
   });
   o << endl << endl;
@@ -56,8 +64,10 @@ void TestRunner::Text(ostream &o)
     ++i;
   }
 
-  o << "\e[35m" << num_fails + num_pass << " test, ";
-  o << "\e[31m" << num_fails << " failures, ";
-  o << "\e[36m" << num_errors << " errors";
+  o << "\e[35m" << counts.num_tests << " tests, ";
+  o << "\e[32m" << counts.num_passes << " passes, ";
+  o << "\e[31m" << counts.num_fails << " failures, ";
+  o << "\e[36m" << counts.num_errors << " errors, ";
+  o << "\e[34m" << counts.num_asserts << " asserts";
   o << "\e[0m" << endl;
 }
