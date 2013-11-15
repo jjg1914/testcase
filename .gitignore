@@ -1,0 +1,15 @@
+src/*.o
+src/.deps/*
+src/test
+*.in
+Makefile
+src/Makefile
+aclocal.m4
+autom4te.cache/*
+config.log
+config.status
+configure
+depcomp
+install-sh
+missing
+INSTALL
