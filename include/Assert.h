@@ -66,6 +66,24 @@
 #define ASSERT_ARRAY_NOT_EQUAL(expected,actual,size)\
   Assert::assert_array_not_equal(expected,actual,size,__FILE__,__LINE__)
 
+#define ASSERT_CONTAINER_EQUAL(expected,actual)\
+  Assert::assert_container_equal(expected,actual,__FILE__,__LINE__)
+
+#define ASSERT_CONTAINER_NOT_EQUAL(expected,actual)\
+  Assert::assert_container_not_equal(expected,actual,__FILE__,__LINE__)
+
+#define ASSERT_CONTAINER_EMPTY(container)\
+  Assert::assert_container_empty(container,__FILE__,__LINE__)
+
+#define ASSERT_CONTAINER_NOT_EMPTY(container)\
+  Assert::assert_container_not_empty(container,__FILE__,__LINE__)
+
+#define ASSERT_CONTAINER_SIZE(expected,actual)\
+  Assert::assert_container_size(expected,actual,__FILE__,__LINE__)
+
+#define ASSERT_CONTAINER_NOT_SIZE(expected,actual)\
+  Assert::assert_container_not_size(expected,actual,__FILE__,__LINE__)
+
 class Assert {
 
   public:
@@ -152,6 +170,30 @@ class Assert {
   template<typename Expected, typename Actual>
   static void assert_array_not_equal(const Expected *expected,
     const Actual *actual, int size, const std::string &filename, int lineno);
+
+  template<typename Expected, typename Actual>
+  static void assert_container_equal(const Expected &expected,
+    const Actual &actual, const std::string &filename, int lineno);
+
+  template<typename Expected, typename Actual>
+  static void assert_container_not_equal(const Expected &expected,
+    const Actual &actual, const std::string &filename, int lineno);
+
+  template<typename T>
+  static void assert_container_empty(const T &container,
+    const std::string &filename, int lineno);
+
+  template<typename T>
+  static void assert_container_not_empty(const T &container,
+    const std::string &filename, int lineno);
+
+  template<typename T>
+  static void assert_container_size(size_t expected, const T &actual,
+    const std::string &filename, int lineno);
+
+  template<typename T>
+  static void assert_container_not_size(size_t expected, const T &actual,
+    const std::string &filename, int lineno);
 
   static int num_asserts();
 
@@ -315,21 +357,22 @@ void Assert::assert_array_equal(const Expected *expected,
   const Actual *actual, int size, const std::string &filename, int lineno)
 {
   ++num_asserts_val;
-  std::stringstream ss;
   std::vector<int> d(diff(expected, expected + size, actual, actual + size));
   if (d.size() > size) {
-    ss << "expected [ ";
+    std::stringstream ss;
+    ss << "expected {";
     for (int i = 0; i < size; ++i) {
       if (i) ss << ", ";
       ss << '"' << actual[i] << '"';
     }
-    ss << " ] to be equal to [ ";
+    ss << "} to be equal to {";
     for (int i = 0; i < size; ++i) {
       if (i) ss << ", ";
       ss << '"' << expected[i] << '"';
     }
-    ss << " ]";
-    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno).diff(sdiff(d,expected,actual)));
+    ss << "}";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno)
+      .diff(sdiff(d,expected,actual)));
   }
 }
 
@@ -338,20 +381,152 @@ void Assert::assert_array_not_equal(const Expected *expected,
   const Actual *actual, int size, const std::string &filename, int lineno)
 {
   ++num_asserts_val;
-  std::stringstream ss;
   std::vector<int> d(diff(expected, expected + size, actual, actual + size));
   if (d.size() == size) {
-    ss << "expected [ ";
+    std::stringstream ss;
+    ss << "expected {";
     for (int i = 0; i < size; ++i) {
       if (i) ss << ", ";
       ss << '"' << actual[i] << '"';
     }
-    ss << " ] to not be equal to [ ";
+    ss << "} to not be equal to {";
     for (int i = 0; i < size; ++i) {
       if (i) ss << ", ";
       ss << '"' << expected[i] << '"';
     }
-    ss << " ]";
+    ss << "}";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  }
+}
+
+template<typename Expected, typename Actual>
+void Assert::assert_container_equal(const Expected &expected,
+  const Actual &actual, const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  std::vector<int> d(diff(begin(expected), end(expected), begin(actual), end(actual)));
+  if (d.size() > distance(begin(expected), end(expected))) {
+    std::stringstream ss;
+    bool first = true;
+    ss << "expected {";
+    for (const auto &i : actual) {
+      if (!first) ss << ", ";
+      ss << '"' << i << '"';
+      first = false;
+    }
+    first = true;
+    ss << "} to be equal to {";
+    for (const auto &i : expected) {
+      if (!first) ss << ", ";
+      ss << '"' << i << '"';
+      first = false;
+    }
+    ss << "}";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno)
+      .diff(sdiff(d,begin(expected),begin(actual))));
+  }
+}
+
+template<typename Expected, typename Actual>
+void Assert::assert_container_not_equal(const Expected &expected,
+  const Actual &actual, const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  std::vector<int> d(diff(begin(expected), end(expected), begin(actual), end(actual)));
+  if (d.size() == distance(begin(expected), end(expected))) {
+    std::stringstream ss;
+    bool first = true;
+    ss << "expected {";
+    for (const auto &i : actual) {
+      if (!first) ss << ", ";
+      ss << '"' << i << '"';
+      first = false;
+    }
+    first = true;
+    ss << "} to not be equal to {";
+    for (const auto &i : expected) {
+      if (!first) ss << ", ";
+      ss << '"' << i << '"';
+      first = false;
+    }
+    ss << "}";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  }
+}
+
+template<typename T>
+void Assert::assert_container_empty(const T &container,
+  const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  if (distance(begin(container),end(container)) != 0) {
+    std::stringstream ss;
+    bool first = true;
+    ss << "expected {";
+    for (const auto &i : container) {
+      if (!first) ss << ", ";
+      ss << '"' << i << '"';
+      first = false;
+    }
+    ss << "} to be empty";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  }
+}
+
+template<typename T>
+void Assert::assert_container_not_empty(const T &container,
+  const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  if (distance(begin(container),end(container)) == 0) {
+    std::stringstream ss;
+    bool first = true;
+    ss << "expected {";
+    for (const auto &i : container) {
+      if (!first) ss << ", ";
+      ss << '"' << i << '"';
+      first = false;
+    }
+    ss << "} to not be empty";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  }
+}
+
+template<typename T>
+void Assert::assert_container_size(size_t expected, const T &actual,
+  const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  if (distance(begin(actual),end(actual)) != expected) {
+    std::stringstream ss;
+    bool first = true;
+    ss << "expected {";
+    for (const auto &i : actual) {
+      if (!first) ss << ", ";
+      ss << '"' << i << '"';
+      first = false;
+    }
+    ss << "} to have size " << expected;
+    ss << " (" << distance(begin(actual),end(actual)) << ")";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  }
+}
+
+template<typename T>
+void Assert::assert_container_not_size(size_t expected, const T &actual,
+  const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  if (distance(begin(actual),end(actual)) == expected) {
+    std::stringstream ss;
+    bool first = true;
+    ss << "expected {";
+    for (const auto &i : actual) {
+      if (!first) ss << ", ";
+      ss << '"' << i << '"';
+      first = false;
+    }
+    ss << "} to not have size " << expected;
     throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }

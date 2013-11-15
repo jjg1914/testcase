@@ -1,7 +1,6 @@
 #ifndef H_BACKTRACE
 #define H_BACKTRACE
 
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -46,7 +45,7 @@ std::vector<int> diff(A a_start, A a_end, B b_start, B b_end)
   std::vector<int> rval;
   std::vector<std::vector<int>> mat = lcs(a_start,a_end,b_start,b_end);
   int i = 0, j = 0;
-  int a_len(a_end - a_start), b_len(b_end - b_start);
+  int a_len(std::distance(a_start,a_end)), b_len(std::distance(b_start,b_end));
 
   while (i < a_len || j < b_len) {
     if (i == a_len) {
@@ -73,7 +72,7 @@ std::vector<int> diff(A a_start, A a_end, B b_start, B b_end)
 template<typename A, typename B>
 std::vector<std::vector<int>> lcs(A a_start, A a_end, B b_start, B b_end)
 {
-  int a_len(a_end - a_start), b_len(b_end - b_start);
+  int a_len(std::distance(a_start, a_end)), b_len(std::distance(b_start, b_end));
   std::vector<std::vector<int>> rval;
   while(rval.size() < a_len) {
     rval.emplace_back();
@@ -88,9 +87,11 @@ std::vector<std::vector<int>> lcs(A a_start, A a_end, B b_start, B b_end)
     }
     if (rval[i][j] < 0) {
       if (*a == *b) {
-        rval[i][j] = 1 + impl(i + 1,j + 1,a + 1,b + 1);
+        rval[i][j] = 1 + impl(i + 1,j + 1,++a,++b);
       } else {
-        rval[i][j] = std::max(impl(i + 1,j,a + 1,b),impl(i,j + 1,a,b + 1));
+        A a_copy(a);
+        B b_copy(b);
+        rval[i][j] = std::max(impl(i + 1,j,++a_copy,b),impl(i,j + 1,a,++b_copy));
       }
     }
     return rval[i][j];

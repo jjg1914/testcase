@@ -1,4 +1,5 @@
 #include <string>
+#include <list>
 #include <stdexcept>
 
 #include "TestRunner.h"
@@ -145,6 +146,38 @@ int main() {
       int x[5] = {1, 2, 2, 6, 7};
       int y[5] = {1, 2, 2, 6, 7};
       ASSERT_ARRAY_NOT_EQUAL(x,y,5);
+    });
+
+    test("test 27", []{
+      list<string> x = { "foo", "bar", "baz" };
+      list<string> y = { "moo", "foo", "baz" };
+      ASSERT_CONTAINER_EQUAL(x,y);
+    });
+
+    test("test 28", []{
+      list<string> x = { "foo", "bar", "baz" };
+      list<string> y = { "foo", "bar", "baz" };
+      ASSERT_CONTAINER_NOT_EQUAL(x,y);
+    });
+
+    test("test 29", []{
+      list<string> x = { "foo", "bar", "baz" };
+      ASSERT_CONTAINER_EMPTY(x);
+    });
+
+    test("test 30", []{
+      list<string> x = {};
+      ASSERT_CONTAINER_NOT_EMPTY(x);
+    });
+
+    test("test 31", []{
+      list<string> x = { "foo", "bar", "baz" };
+      ASSERT_CONTAINER_SIZE(4,x);
+    });
+
+    test("test 32", []{
+      list<string> x = { "foo", "bar", "baz" };
+      ASSERT_CONTAINER_NOT_SIZE(3,x);
     });
   });
 
