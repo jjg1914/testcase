@@ -57,6 +57,10 @@ class TestInfo {
 
   TestInfo asserts(int asserts_val) const;
 
+  const std::string &diff() const;
+
+  TestInfo diff(const std::string &diff) const;
+
   private:
 
   Status status_val;
@@ -74,6 +78,8 @@ class TestInfo {
   std::string what_val;
 
   int asserts_val;
+
+  std::string diff_val;
 };
 
 #endif

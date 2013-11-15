@@ -60,6 +60,12 @@
 #define ASSERT_NO_EXCEPTION(lambda)\
   Assert::assert_no_exception(lambda,__FILE__,__LINE__)
 
+#define ASSERT_ARRAY_EQUAL(expected,actual,size)\
+  Assert::assert_array_equal(expected,actual,size,__FILE__,__LINE__)
+
+#define ASSERT_ARRAY_NOT_EQUAL(expected,actual,size)\
+  Assert::assert_array_not_equal(expected,actual,size,__FILE__,__LINE__)
+
 class Assert {
 
   public:
@@ -138,6 +144,14 @@ class Assert {
 
   static void assert_no_exception(const std::function<void()> &f,
     const std::string &filename, int lineno);
+
+  template<typename Expected, typename Actual>
+  static void assert_array_equal(const Expected *expected,
+    const Actual *actual, int size, const std::string &filename, int lineno);
+
+  template<typename Expected, typename Actual>
+  static void assert_array_not_equal(const Expected *expected,
+    const Actual *actual, int size, const std::string &filename, int lineno);
 
   static int num_asserts();
 
@@ -294,6 +308,52 @@ void Assert::assert_exception(const std::function<void()> &f,
     ss << "caught unknown";
   }
   throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+}
+
+template<typename Expected, typename Actual>
+void Assert::assert_array_equal(const Expected *expected,
+  const Actual *actual, int size, const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  std::stringstream ss;
+  std::vector<int> d(diff(expected, expected + size, actual, actual + size));
+  if (d.size() > size) {
+    ss << "expected [ ";
+    for (int i = 0; i < size; ++i) {
+      if (i) ss << ", ";
+      ss << '"' << actual[i] << '"';
+    }
+    ss << " ] to be equal to [ ";
+    for (int i = 0; i < size; ++i) {
+      if (i) ss << ", ";
+      ss << '"' << expected[i] << '"';
+    }
+    ss << " ]";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno).diff(sdiff(d,expected,actual)));
+  }
+}
+
+template<typename Expected, typename Actual>
+void Assert::assert_array_not_equal(const Expected *expected,
+  const Actual *actual, int size, const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  std::stringstream ss;
+  std::vector<int> d(diff(expected, expected + size, actual, actual + size));
+  if (d.size() == size) {
+    ss << "expected [ ";
+    for (int i = 0; i < size; ++i) {
+      if (i) ss << ", ";
+      ss << '"' << actual[i] << '"';
+    }
+    ss << " ] to not be equal to [ ";
+    for (int i = 0; i < size; ++i) {
+      if (i) ss << ", ";
+      ss << '"' << expected[i] << '"';
+    }
+    ss << " ]";
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  }
 }
 
 #endif

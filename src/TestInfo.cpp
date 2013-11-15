@@ -1,3 +1,4 @@
+#include <iostream>
 #include <sstream>
 
 #include "Assert.h"
@@ -66,7 +67,8 @@ TestInfo::TestInfo()
     suite_val(),
     backtrace_val(),
     what_val(),
-    asserts_val(0)
+    asserts_val(0),
+    diff_val()
 {}
 
 TestInfo TestInfo::deserialize(const string &src)
@@ -98,6 +100,8 @@ TestInfo TestInfo::deserialize(const string &src)
     } else if (attr == "asserts") {
       stringstream toi(value);
       toi >> info.asserts_val;
+    } else if (attr == "diff") {
+      info.diff_val = decode_string(value);
     }
   }
 
@@ -115,6 +119,7 @@ string TestInfo::serialize() const
   ss << "backtrace:" << encode_string(backtrace_val) << endl;
   ss << "what:" << encode_string(what_val) << endl;
   ss << "asserts:" << asserts_val << endl;
+  ss << "diff:" << encode_string(diff_val) << endl;
   return ss.str();
 }
 
@@ -211,5 +216,17 @@ TestInfo TestInfo::asserts(int asserts_val) const
 {
   TestInfo rval(*this);
   rval.asserts_val = asserts_val;
+  return rval;
+}
+
+const string &TestInfo::diff() const
+{
+  return diff_val;
+}
+
+TestInfo TestInfo::diff(const string &diff_val) const
+{
+  TestInfo rval(*this);
+  rval.diff_val = diff_val;
   return rval;
 }

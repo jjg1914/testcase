@@ -134,6 +134,18 @@ int main() {
         throw logic_error("logic error");
       });
     });
+
+    test("test 25", []{
+      int x[5] = {1, 2, 2, 6, 7};
+      int y[5] = {2, 3, 6, 7, 8};
+      ASSERT_ARRAY_EQUAL(x,y,5);
+    });
+
+    test("test 26", []{
+      int x[5] = {1, 2, 2, 6, 7};
+      int y[5] = {1, 2, 2, 6, 7};
+      ASSERT_ARRAY_NOT_EQUAL(x,y,5);
+    });
   });
 
   TestRunner::Text();

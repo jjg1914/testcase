@@ -51,6 +51,23 @@ void TestRunner::Text(ostream &o)
     }
     o << failure.what() << endl;
     if (failure.status() == TestInfo::FAILED) {
+      if (failure.diff().size()) {
+        o << endl;// << "  \e[36mDiff:" << endl;
+        stringstream ss(failure.diff());
+        string line;
+        while (getline(ss,line)) {
+          o << "  ";
+          if (line[0] == '+') {
+            o << "\e[32m";
+          } else if (line[0] == '-') {
+            o << "\e[31m";
+          } else {
+            o << "\e[35m";
+          }
+          o << line << endl;
+        }
+      }
+
       o << "  \e[35m[" << failure.filename() << ":";
       o << failure.lineno() << "]" << endl;
     } else {
