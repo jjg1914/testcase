@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "Assert.h"
 
 using namespace std;
@@ -83,4 +85,37 @@ void Assert::assert_no_exception(const std::function<void()> &f,
     ss << "expected no exception, caught unknown";
   }
   throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+}
+
+void Assert::assert_float_equal(float expected, float actual, float diff,
+  const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  if (fabs(expected - actual) > diff) {
+    std::stringstream ss;
+    ss << "expected " << actual << " to be equal to " << expected << ", within " << diff;
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  }
+}
+
+void Assert::assert_float_equal(double expected, double actual, double diff,
+  const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  if (fabs(expected - actual) > diff) {
+    std::stringstream ss;
+    ss << "expected " << actual << " to be equal to " << expected << ", within " << diff;
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  }
+}
+
+void Assert::assert_float_not_equal(double expected, double actual, double diff,
+  const std::string &filename, int lineno)
+{
+  ++num_asserts_val;
+  if (fabs(expected - actual) <= diff) {
+    std::stringstream ss;
+    ss << "expected " << actual << " to not be equal to " << expected << ", within " << diff;
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  }
 }

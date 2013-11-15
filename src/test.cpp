@@ -179,6 +179,22 @@ int main() {
       list<string> x = { "foo", "bar", "baz" };
       ASSERT_CONTAINER_NOT_SIZE(3,x);
     });
+
+    test("test 33", []{
+      ASSERT_FLOAT_EQUAL(5.005,5.007,0.001);
+    });
+
+    test("test 34", []{
+      ASSERT_FLOAT_NOT_EQUAL(5.005,5.007,0.003);
+    });
+
+    test("test 35", []{
+      ASSERT_FLOAT_EQUAL((double)5.005,(double)5.007,(double)0.001);
+    });
+
+    test("test 36", []{
+      ASSERT_FLOAT_NOT_EQUAL((double)5.005,(double)5.007,(double)0.003);
+    });
   });
 
   TestRunner::Text();

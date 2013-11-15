@@ -84,6 +84,12 @@
 #define ASSERT_CONTAINER_NOT_SIZE(expected,actual)\
   Assert::assert_container_not_size(expected,actual,__FILE__,__LINE__)
 
+#define ASSERT_FLOAT_EQUAL(expected,actual,diff)\
+  Assert::assert_float_equal(expected,actual,diff,__FILE__,__LINE__)
+
+#define ASSERT_FLOAT_NOT_EQUAL(expected,actual,diff)\
+  Assert::assert_float_not_equal(expected,actual,diff,__FILE__,__LINE__)
+
 class Assert {
 
   public:
@@ -193,6 +199,18 @@ class Assert {
 
   template<typename T>
   static void assert_container_not_size(size_t expected, const T &actual,
+    const std::string &filename, int lineno);
+
+  static void assert_float_equal(float expected, float actual, float diff,
+    const std::string &filename, int lineno);
+
+  static void assert_float_equal(double expected, double actual, double diff,
+    const std::string &filename, int lineno);
+
+  static void assert_float_not_equal(float expected, float actual, float diff,
+    const std::string &filename, int lineno);
+
+  static void assert_float_not_equal(double expected, double actual, double diff,
     const std::string &filename, int lineno);
 
   static int num_asserts();
