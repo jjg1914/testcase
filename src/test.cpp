@@ -1,6 +1,7 @@
 #include <string>
 #include <list>
 #include <stdexcept>
+#include <iostream>
 
 #include "testcase/testcase.h"
 
@@ -10,7 +11,9 @@ using namespace testcase;
 struct A { virtual ~A() {}; } a;
 struct B : public A { virtual ~B() {}; } b;
 
-int throw_sigfpe(int a,int b)
+volatile int v = -1;
+
+int throw_sigfpe(volatile int &a,int b)
 {
   return a/b;
 }
@@ -88,11 +91,12 @@ int main() {
     test("test 13", []{ASSERT_TRUE(true);});
 
     test("test 14", []{
-      throw_sigfpe(0,0);
+      v = throw_sigfpe(v,0);
+      cout << v << endl;
     });
 
     test("test 15", []{
-      throw_sigseg(NULL);
+      v = throw_sigseg(NULL);
     });
 
     test("test 16", []{

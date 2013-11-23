@@ -3,6 +3,8 @@
 *.la
 *.o
 *.pc
+*.log
+*.trs
 **/.deps/
 **/.libs/
 **/Makefile

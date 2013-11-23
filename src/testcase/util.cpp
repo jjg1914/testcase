@@ -29,10 +29,10 @@ namespace {
       (*report_stream) << e.info();
     } catch (exception &e) {
       (*report_stream) << TestInfo::error(string(e.what()) + " (" + demangle(typeid(e)) + ")")
-        .backtrace(sbacktrace(5,18));
+        .backtrace(sbacktrace(5,13));
     } catch (...) {
       (*report_stream) << TestInfo::error("unknown exception")
-        .backtrace(sbacktrace(5,18));
+        .backtrace(sbacktrace(5,13));
     }
     abort();
   }
@@ -40,14 +40,14 @@ namespace {
   void handle_sigfpe(int)
   {
     (*report_stream) << TestInfo::error("Arithmetic Error")
-      .backtrace(sbacktrace(3,18));
+      .backtrace(sbacktrace(3,12));
     abort();
   }
 
   void handle_sigsegv(int)
   {
     (*report_stream) << TestInfo::error("Segmentation Fault")
-      .backtrace(sbacktrace(3,18));
+      .backtrace(sbacktrace(3,12));
     abort();
   }
 }
