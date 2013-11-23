@@ -9,40 +9,48 @@ A simple unit testing framework for C++.
 
 ## Example
 
-    #include "testcase/testcase.h"
+```C++
+#include "testcase/testcase.h"
 
-    using namespace testcase;
+using namespace testcase;
 
-    TestSuite test_suite("test_suite", [](const TestCase &test) {
-      int value = 2;
+TestSuite test_suite("test_suite", [](const TestCase &test) {
+  int value = 2;
 
-      test("test", [&value]{
-        ASSERT_EQUAL(2,value);
-      });
-    });
+  test("test", [&value]{
+    ASSERT_EQUAL(2,value);
+  });
+});
 
-    int main()
-    {
-      TestRunner::Text();
-      return 0;
-    }
+int main()
+{
+  TestRunner::Text();
+  return 0;
+}
+```
 
 ## Installation
 
 Generate autotools system:
 
-    ./auto-build
+```Shell
+./auto-build
+```
 
 Build and install
 
-    ./configure
-    make
-    make installl
+```Shell
+./configure
+make
+make installl
+```
 
 Use with pkg-config
 
-    pkg-config --cflags testcase
-    pkg-config --libs testcase
+```Shell
+pkg-config --cflags testcase
+pkg-config --libs testcase
+```
 
 ## Assertions
 
