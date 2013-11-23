@@ -1,7 +1,9 @@
 #include <iostream>
-#include "TestSuite.h"
+
+#include "testcase/TestSuite.h"
 
 using namespace std;
+using namespace testcase;
 
 std::list<const TestSuite*> TestSuite::suites;
 

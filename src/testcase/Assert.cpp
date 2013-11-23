@@ -1,8 +1,9 @@
 #include <cmath>
 
-#include "Assert.h"
+#include "testcase/Assert.h"
 
 using namespace std;
+using namespace testcase;
 
 int Assert::num_asserts_val = 0;
 
@@ -23,14 +24,14 @@ TestInfo Assert::Error::info() const noexcept
 void Assert::assert_fail(const string message, const string &filename,
   int lineno)
 {
-  ++num_asserts_val;
+  ++Assert::num_asserts_val;
   throw Assert::Error(TestInfo::failed(message, filename, lineno));
 }
 
 void Assert::assert_true(bool cond, const string &expr,
   const string &filename, int lineno)
 {
-  ++num_asserts_val;
+  ++Assert::num_asserts_val;
   if (!cond) {
     stringstream ss;
     ss << "expected true (" << expr << ")";
@@ -41,7 +42,7 @@ void Assert::assert_true(bool cond, const string &expr,
 void Assert::assert_false(bool cond, const string &expr,
   const string &filename, int lineno)
 {
-  ++num_asserts_val;
+  ++Assert::num_asserts_val;
   if (cond) {
     stringstream ss;
     ss << "expected false (" << expr << ")";
@@ -50,9 +51,9 @@ void Assert::assert_false(bool cond, const string &expr,
 }
 
 void Assert::assert_match(const string &expected, const string &actual,
-  const std::string &filename, int lineno)
+  const string &filename, int lineno)
 {
-  ++num_asserts_val;
+  ++Assert::num_asserts_val;
   if (!regex_match(actual, regex(expected))) {
     stringstream ss;
     ss << "expected \"" << actual << "\" to match /" << expected << "/";
@@ -61,9 +62,9 @@ void Assert::assert_match(const string &expected, const string &actual,
 }
 
 void Assert::assert_not_match(const string &expected, const string &actual,
-  const std::string &filename, int lineno)
+  const string &filename, int lineno)
 {
-  ++num_asserts_val;
+  ++Assert::num_asserts_val;
   if (regex_match(actual, regex(expected))) {
     stringstream ss;
     ss << "expected \"" << actual << "\" to not match /" << expected << "/";
@@ -72,10 +73,10 @@ void Assert::assert_not_match(const string &expected, const string &actual,
 }
 
 void Assert::assert_no_exception(const std::function<void()> &f,
-  const std::string &filename, int lineno)
+  const string &filename, int lineno)
 {
-  ++num_asserts_val;
-  std::stringstream ss;
+  ++Assert::num_asserts_val;
+  stringstream ss;
   try {
     f();
     return;
@@ -88,33 +89,33 @@ void Assert::assert_no_exception(const std::function<void()> &f,
 }
 
 void Assert::assert_float_equal(float expected, float actual, float diff,
-  const std::string &filename, int lineno)
+  const string &filename, int lineno)
 {
-  ++num_asserts_val;
+  ++Assert::num_asserts_val;
   if (fabs(expected - actual) > diff) {
-    std::stringstream ss;
+    stringstream ss;
     ss << "expected " << actual << " to be equal to " << expected << ", within " << diff;
     throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }
 
 void Assert::assert_float_equal(double expected, double actual, double diff,
-  const std::string &filename, int lineno)
+  const string &filename, int lineno)
 {
-  ++num_asserts_val;
+  ++Assert::num_asserts_val;
   if (fabs(expected - actual) > diff) {
-    std::stringstream ss;
+    stringstream ss;
     ss << "expected " << actual << " to be equal to " << expected << ", within " << diff;
     throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }
 }
 
 void Assert::assert_float_not_equal(double expected, double actual, double diff,
-  const std::string &filename, int lineno)
+  const string &filename, int lineno)
 {
-  ++num_asserts_val;
+  ++Assert::num_asserts_val;
   if (fabs(expected - actual) <= diff) {
-    std::stringstream ss;
+    stringstream ss;
     ss << "expected " << actual << " to not be equal to " << expected << ", within " << diff;
     throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
   }

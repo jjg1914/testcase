@@ -2,11 +2,10 @@
 #include <list>
 #include <stdexcept>
 
-#include "TestRunner.h"
-#include "TestSuite.h"
-#include "Assert.h"
+#include "testcase/testcase.h"
 
 using namespace std;
+using namespace testcase;
 
 struct A { virtual ~A() {}; } a;
 struct B : public A { virtual ~B() {}; } b;

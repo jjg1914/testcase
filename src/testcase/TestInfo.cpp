@@ -1,11 +1,12 @@
 #include <iostream>
 #include <sstream>
 
-#include "Assert.h"
+#include "testcase/Assert.h"
 
-#include "TestInfo.h"
+#include "testcase/TestInfo.h"
 
 using namespace std;
+using namespace testcase;
 
 namespace {
   string encode_string(const string &src)

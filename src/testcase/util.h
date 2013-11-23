@@ -1,5 +1,5 @@
-#ifndef H_BACKTRACE
-#define H_BACKTRACE
+#ifndef H_TESTCASE_UTIL
+#define H_TESTCASE_UTIL
 
 #include <sstream>
 #include <string>
@@ -7,21 +7,33 @@
 #include <vector>
 #include <algorithm>
 
-std::string sbacktrace(int bottom_offset = 0, int top_offset = 0);
+#include "testcase/ReportStream.h"
+#include "testcase/TestCase.h"
 
-std::string demangle(const std::type_info &info);
+namespace testcase {
+
+  void handler_install(testcase::ReportStream *rs);
+
+  std::string sbacktrace(int bottom_offset = 0, int top_offset = 0);
+
+  std::string demangle(const std::type_info &info);
+
+  template<typename A, typename B>
+  std::string sdiff(const std::vector<int> &d, A a_start, B b_start);
+
+  template<typename A, typename B>
+  std::vector<int> diff(A a_start, A a_end, B b_start, B b_end);
+
+  template<typename A, typename B>
+  std::vector<std::vector<int>> lcs(A a_start, A a_end, B b_start, B b_end);
+
+  void synchronize(const testcase::TestCase::AsyncCase &f);
+
+  int synchronize_on_fork(const std::function<void(void)> &f);
+}
 
 template<typename A, typename B>
-std::string sdiff(const std::vector<int> &d, A a_start, B b_start);
-
-template<typename A, typename B>
-std::vector<int> diff(A a_start, A a_end, B b_start, B b_end);
-
-template<typename A, typename B>
-std::vector<std::vector<int>> lcs(A a_start, A a_end, B b_start, B b_end);
-
-template<typename A, typename B>
-std::string sdiff(const std::vector<int>& d, A a_start, B b_start)
+std::string testcase::sdiff(const std::vector<int>& d, A a_start, B b_start)
 {
   std::stringstream ss;
   for (int i = 0; i < d.size(); ++i) {
@@ -40,10 +52,10 @@ std::string sdiff(const std::vector<int>& d, A a_start, B b_start)
 }
 
 template<typename A, typename B>
-std::vector<int> diff(A a_start, A a_end, B b_start, B b_end)
+std::vector<int> testcase::diff(A a_start, A a_end, B b_start, B b_end)
 {
   std::vector<int> rval;
-  std::vector<std::vector<int>> mat = lcs(a_start,a_end,b_start,b_end);
+  std::vector<std::vector<int>> mat = testcase::lcs(a_start,a_end,b_start,b_end);
   int i = 0, j = 0;
   int a_len(std::distance(a_start,a_end)), b_len(std::distance(b_start,b_end));
 
@@ -70,7 +82,7 @@ std::vector<int> diff(A a_start, A a_end, B b_start, B b_end)
 }
 
 template<typename A, typename B>
-std::vector<std::vector<int>> lcs(A a_start, A a_end, B b_start, B b_end)
+std::vector<std::vector<int>> testcase::lcs(A a_start, A a_end, B b_start, B b_end)
 {
   int a_len(std::distance(a_start, a_end)), b_len(std::distance(b_start, b_end));
   std::vector<std::vector<int>> rval;

@@ -1,11 +1,10 @@
-#include "backtrace.h"
-#include "handler.h"
-#include "synchronize.h"
-#include "ReportStream.h"
+#include "testcase/util.h"
+#include "testcase/ReportStream.h"
 
-#include "TestCase.h"
+#include "testcase/TestCase.h"
 
 using namespace std;
+using namespace testcase;
 
 TestCase::TestCase(const TestCase::Runner &f)
   : runner(f)

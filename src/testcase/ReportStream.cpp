@@ -1,9 +1,10 @@
 #include "unistd.h"
 
-#include "ReportStream.h"
+#include "testcase/ReportStream.h"
 
 using namespace std;
 using namespace __gnu_cxx;
+using namespace testcase;
 
 ReportStream::ReportStream()
   : p(),

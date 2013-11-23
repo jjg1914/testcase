@@ -1,11 +1,12 @@
 #include <vector>
 #include <sstream>
 
-#include "TestSuite.h"
+#include "testcase/TestSuite.h"
 
-#include "TestRunner.h"
+#include "testcase/TestRunner.h"
 
 using namespace std;
+using namespace testcase;
 
 void TestRunner::Text(ostream &o)
 {

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+shopt -s globstar
+
+rm -rf **/*.o **/*.lo **/*.la **/.libs src/**/.deps **/Makefile **/Makefile.in **/*.pc aclocal.m4 autom4te.cache config.log config.status configure depcomp install-sh missing INSTALL compile config.guess config.sub libtool ltmain.sh m4 test-driver Makefile Makefile.in
