@@ -86,9 +86,9 @@ std::vector<std::vector<int>> testcase::lcs(A a_start, A a_end, B b_start, B b_e
 {
   int a_len(std::distance(a_start, a_end)), b_len(std::distance(b_start, b_end));
   std::vector<std::vector<int>> rval;
-  while(rval.size() < a_len) {
+  while(rval.size() <= a_len) {
     rval.emplace_back();
-    while(rval.back().size() < b_len) {
+    while(rval.back().size() <= b_len) {
       rval.back().emplace_back(-1);
     }
   }

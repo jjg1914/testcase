@@ -198,6 +198,12 @@ int main() {
     test("test 36", []{
       ASSERT_FLOAT_NOT_EQUAL((double)5.005,(double)5.007,(double)0.003);
     });
+
+    test("test 37", []{
+      int x[] = { 1, 2, 3 };
+      int y[] = { 1, 4, 5 };
+      ASSERT_CONTAINER_EQUAL(x,y);
+    });
   });
 
   TestRunner::Text();
