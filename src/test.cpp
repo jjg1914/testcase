@@ -210,6 +210,12 @@ int main() {
     test("test 38", 100, []{
       this_thread::sleep_for(chrono::milliseconds(1000));
     });
+
+    test("test 39", []{
+      ASSERT_CALLBACK(3, callback);
+      callback();
+      callback();
+    });
   });
 
   TestRunner::Text();

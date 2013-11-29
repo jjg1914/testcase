@@ -21,6 +21,28 @@ TestInfo Assert::Error::info() const noexcept
   return info_val;
 }
 
+Assert::Callback::Callback(int times, const std::string &filename, int lineno)
+  : times(times),
+    called(0),
+    filename(filename),
+    lineno(lineno)
+{}
+
+Assert::Callback::~Callback()
+{
+  ++Assert::num_asserts_val;
+  if (called != times) {
+    stringstream ss;
+    ss << "expected callback " << times << " times, called " << called;
+    throw Assert::Error(TestInfo::failed(ss.str(), filename, lineno));
+  }
+}
+
+void Assert::Callback::operator()()
+{
+  ++called;
+}
+
 void Assert::assert_fail(const string message, const string &filename,
   int lineno)
 {

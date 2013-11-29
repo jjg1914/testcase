@@ -90,6 +90,9 @@
 #define ASSERT_FLOAT_NOT_EQUAL(expected,actual,diff)\
   Assert::assert_float_not_equal(expected,actual,diff,__FILE__,__LINE__)
 
+#define ASSERT_CALLBACK(expected,callback)\
+  Assert::Callback callback(expected,__FILE__,__LINE__)
+
 namespace testcase {
 
   class Assert {
@@ -107,6 +110,27 @@ namespace testcase {
       private:
 
       TestInfo info_val;
+    };
+
+    class Callback {
+
+      public:
+
+      Callback(int times, const std::string &filename, int lineno);
+
+      ~Callback();
+
+      void operator()();
+
+      private:
+
+      int times;
+      
+      int called;
+
+      std::string filename;
+
+      int lineno;
     };
 
     static void assert_fail(const std::string message,
