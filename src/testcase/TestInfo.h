@@ -12,7 +12,8 @@ namespace testcase {
     enum Status {
       PASSED = 0,
       FAILED,
-      ERROR
+      ERROR,
+      TIMEOUT
     };
 
     static TestInfo passed();
@@ -20,6 +21,8 @@ namespace testcase {
     static TestInfo failed(const std::string &what, const std::string &file, int line);
 
     static TestInfo error(const std::string &what);
+
+    static TestInfo timeout();
 
     static TestInfo deserialize(const std::string &src);
 

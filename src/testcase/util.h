@@ -12,7 +12,7 @@
 
 namespace testcase {
 
-  void handler_install(testcase::ReportStream *rs);
+  void handler_install(testcase::ReportStream *rs, int timeout);
 
   std::string sbacktrace(int bottom_offset = 0, int top_offset = 0);
 

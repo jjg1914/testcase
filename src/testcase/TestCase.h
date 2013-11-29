@@ -25,6 +25,10 @@ namespace testcase {
 
     void operator()(const std::string &name, const SyncCase &f) const;
 
+    void operator()(const std::string &name, int timeout, const AsyncCase &f) const;
+
+    void operator()(const std::string &name, int timeout, const SyncCase &f) const;
+
     private:
 
     Runner runner;

@@ -2,6 +2,8 @@
 #include <list>
 #include <stdexcept>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 #include "testcase/testcase.h"
 
@@ -203,6 +205,10 @@ int main() {
       int x[] = { 1, 2, 3 };
       int y[] = { 1, 4, 5 };
       ASSERT_CONTAINER_EQUAL(x,y);
+    });
+
+    test("test 38", 100, []{
+      this_thread::sleep_for(chrono::milliseconds(1000));
     });
   });
 

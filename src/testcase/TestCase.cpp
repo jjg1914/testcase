@@ -12,9 +12,20 @@ TestCase::TestCase(const TestCase::Runner &f)
 
 void TestCase::operator()(const string &name, const AsyncCase &f) const
 {
+  operator()(name,0,f);
+}
+
+void TestCase::operator()(const string &name, const SyncCase &f) const
+{
+  operator()(name,0,[&f](const Callback &cb){ f(); cb(); });
+}
+
+void TestCase::operator()(const std::string &name, int timeout,
+  const AsyncCase &f) const
+{
   ReportStream rs;
-  synchronize_on_fork([&f,&rs](){
-    handler_install(&rs);
+  synchronize_on_fork([&f,&rs,timeout](){
+    handler_install(&rs, timeout);
     synchronize(f);
     rs << TestInfo::passed();
   });
@@ -24,7 +35,8 @@ void TestCase::operator()(const string &name, const AsyncCase &f) const
   runner(rval.test_case(name));
 }
 
-void TestCase::operator()(const string &name, const SyncCase &f) const
+void TestCase::operator()(const std::string &name, int timeout,
+  const SyncCase &f) const
 {
-  operator()(name,[&f](const Callback &cb){ f(); cb(); });
+  operator()(name,timeout,[&f](const Callback &cb){ f(); cb(); });
 }

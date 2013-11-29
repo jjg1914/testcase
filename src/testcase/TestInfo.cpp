@@ -60,6 +60,11 @@ TestInfo TestInfo::error(const std::string &what)
   return TestInfo().status(ERROR).what(what).asserts(Assert::num_asserts());
 }
 
+TestInfo TestInfo::timeout()
+{
+  return TestInfo().status(TIMEOUT).asserts(Assert::num_asserts());
+}
+
 TestInfo::TestInfo()
   : status_val(FAILED),
     filename_val(),

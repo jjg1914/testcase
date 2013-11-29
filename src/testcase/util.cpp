@@ -9,6 +9,8 @@
 #include <condition_variable>
 #include <sstream>
 #include <memory>
+#include <thread>
+#include <chrono>
 
 #include "testcase/Assert.h"
 #include "testcase/TestCase.h"
@@ -50,6 +52,12 @@ namespace {
       .backtrace(sbacktrace(3,12));
     abort();
   }
+
+  void handle_sigusr1(int)
+  {
+    (*report_stream) << TestInfo::timeout();
+    abort();
+  }
 }
 
 std::string testcase::sbacktrace(int bottom_offset, int top_offset)
@@ -86,12 +94,20 @@ string testcase::demangle(const type_info &info)
   }
 }
 
-void testcase::handler_install(ReportStream *rs)
+void testcase::handler_install(ReportStream *rs, int timeout)
 {
   report_stream = rs;
   set_terminate(handle_terminate);
   signal(SIGFPE,handle_sigfpe);
   signal(SIGSEGV,handle_sigsegv);
+  signal(SIGUSR1,handle_sigusr1);
+  if (timeout) {
+    thread t([timeout]{
+      this_thread::sleep_for(chrono::milliseconds(timeout));
+      raise(SIGUSR1);
+    });
+    t.detach();
+  }
 }
 
 void testcase::synchronize(const TestCase::AsyncCase &f)
