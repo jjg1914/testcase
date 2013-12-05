@@ -403,7 +403,7 @@ void testcase::Assert::assert_array_equal(const Expected *expected,
 {
   ++testcase::Assert::num_asserts_val;
   std::vector<int> d(testcase::diff(expected, expected + size, actual, actual + size));
-  if (d.size() > size) {
+  if (!pdiff(d)) {
     std::stringstream ss;
     ss << "expected {";
     for (int i = 0; i < size; ++i) {
@@ -427,7 +427,7 @@ void testcase::Assert::assert_array_not_equal(const Expected *expected,
 {
   ++testcase::Assert::num_asserts_val;
   std::vector<int> d(testcase::diff(expected, expected + size, actual, actual + size));
-  if (d.size() == size) {
+  if (pdiff(d)) {
     std::stringstream ss;
     ss << "expected {";
     for (int i = 0; i < size; ++i) {
@@ -450,7 +450,7 @@ void testcase::Assert::assert_container_equal(const Expected &expected,
 {
   ++testcase::Assert::num_asserts_val;
   std::vector<int> d(testcase::diff(std::begin(expected), std::end(expected), std::begin(actual), std::end(actual)));
-  if (d.size() > std::distance(std::begin(expected), std::end(expected))) {
+  if (!pdiff(d)) {
     std::stringstream ss;
     bool first = true;
     ss << "expected {";
@@ -478,7 +478,7 @@ void testcase::Assert::assert_container_not_equal(const Expected &expected,
 {
   ++testcase::Assert::num_asserts_val;
   std::vector<int> d(testcase::diff(std::begin(expected), std::end(expected), std::begin(actual), std::end(actual)));
-  if (d.size() == std::distance(std::begin(expected), std::end(expected))) {
+  if (pdiff(d)) {
     std::stringstream ss;
     bool first = true;
     ss << "expected {";

@@ -93,15 +93,19 @@ int main() {
     test("test 13", []{ASSERT_TRUE(true);});
 
     test("test 14", []{
+      string s("s");
       v = throw_sigfpe(v,0);
       cout << v << endl;
     });
 
     test("test 15", []{
+      string s("s");
       v = throw_sigseg(NULL);
+      cout << v << endl;
     });
 
     test("test 16", []{
+      string s("s");
       throw_logic_error();
     });
 
@@ -112,6 +116,7 @@ int main() {
     });
 
     test("test 18", []{
+      string s("s");
       throw_int();
     });
 
@@ -215,6 +220,26 @@ int main() {
       ASSERT_CALLBACK(3, callback);
       callback();
       callback();
+    });
+
+    test("test 40", []{
+      list<int> x = { 1, 2, 3 };
+      list<int> y = {};
+      ASSERT_CONTAINER_EQUAL(x,y);
+    });
+
+    test("test 41", 500, [](const TestCase::Callback &cb){
+      string s("s");
+      thread t([cb]{
+        cb();
+      });
+    });
+
+    test("test 42", 500, [](const TestCase::Callback &cb){
+      thread t([cb]{
+        cb();
+      });
+      t.detach();
     });
   });
 

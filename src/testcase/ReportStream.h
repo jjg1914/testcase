@@ -3,6 +3,7 @@
 
 #include "ext/stdio_filebuf.h"
 #include <iostream>
+#include <stdexcept>
 
 #include "testcase/TestInfo.h"
 
@@ -12,11 +13,22 @@ namespace testcase {
 
     public:
 
+    class EOFException : public std::logic_error {
+
+      public:
+
+      EOFException();
+    };
+
     ReportStream();
 
     ReportStream &operator<<(const TestInfo &info);
 
     ReportStream &operator>>(TestInfo &info);
+
+    void close_in();
+
+    void close_out();
 
     private:
 
@@ -30,6 +42,8 @@ namespace testcase {
 
       int fileds[2];
     } p;
+
+    int pid;
 
     __gnu_cxx::stdio_filebuf<char> inbuff, outbuff;
 

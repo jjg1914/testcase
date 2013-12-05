@@ -12,9 +12,9 @@
 
 namespace testcase {
 
-  void handler_install(testcase::ReportStream *rs, int timeout);
+  void handler_install(testcase::ReportStream &rs, int timeout);
 
-  std::string sbacktrace(int bottom_offset = 0, int top_offset = 0);
+  std::string ssymbol(void* addr, const char* sym);
 
   std::string demangle(const std::type_info &info);
 
@@ -26,6 +26,8 @@ namespace testcase {
 
   template<typename A, typename B>
   std::vector<std::vector<int>> lcs(A a_start, A a_end, B b_start, B b_end);
+
+  bool pdiff(const std::vector<int> &d);
 
   void synchronize(const testcase::TestCase::AsyncCase &f);
 

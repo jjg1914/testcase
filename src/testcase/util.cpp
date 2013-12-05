@@ -1,6 +1,6 @@
-#include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
+#include <bfd.h>
 #include <cstdlib>
 #include <csignal>
 #include <unistd.h>
@@ -11,9 +11,13 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <algorithm>
+#include <iostream>
+#include <map>
 
 #include "testcase/Assert.h"
 #include "testcase/TestCase.h"
+#include "testcase/backtrace.h"
 
 #include "testcase/util.h"
 
@@ -21,98 +25,70 @@ using namespace std;
 using namespace testcase;
 
 namespace {
-  ReportStream *report_stream(NULL);
-
-  void handle_terminate()
-  {
-    try {
-      throw;
-    } catch (Assert::Error &e) {
-      (*report_stream) << e.info();
-    } catch (exception &e) {
-      (*report_stream) << TestInfo::error(string(e.what()) + " (" + demangle(typeid(e)) + ")")
-        .backtrace(sbacktrace(5,13));
-    } catch (...) {
-      (*report_stream) << TestInfo::error("unknown exception")
-        .backtrace(sbacktrace(5,13));
-    }
-    abort();
-  }
-
-  void handle_sigfpe(int)
-  {
-    (*report_stream) << TestInfo::error("Arithmetic Error")
-      .backtrace(sbacktrace(3,12));
-    abort();
-  }
-
-  void handle_sigsegv(int)
-  {
-    (*report_stream) << TestInfo::error("Segmentation Fault")
-      .backtrace(sbacktrace(3,12));
-    abort();
-  }
-
-  void handle_sigusr1(int)
-  {
-    (*report_stream) << TestInfo::timeout();
-    abort();
-  }
-}
-
-std::string testcase::sbacktrace(int bottom_offset, int top_offset)
-{
-  stringstream ss;
-  void *buf[32];
-  int size = backtrace((void**)&buf,32);
-  char **trace = backtrace_symbols(buf,size);
-  for (int i = bottom_offset; i < size - top_offset; ++i) {
-    Dl_info info;
-    if (dladdr(buf[i], &info) && info.dli_sname) {
-      char *demangled = NULL;
-      int status = -1;
-      if (info.dli_sname[0] == '_') {
-        demangled = abi::__cxa_demangle(info.dli_sname, NULL, 0, &status);
-      }
-      ss << (status ? (info.dli_sname ? info.dli_sname : trace[i]) : demangled) << endl;
-    } else {
-      ss << trace[i] << endl;
-    }
-  }
-  free(trace);
-  return ss.str();
+  int backtrace_top = 0;
 }
 
 string testcase::demangle(const type_info &info)
 {
-  int status;
-  unique_ptr<char> realname(abi::__cxa_demangle(info.name(), 0, 0, &status));
-  if (status) {
-    return info.name();
-  } else {
-    return realname.get();
-  }
+  return backtrace_demangle(info.name());
 }
 
-void testcase::handler_install(ReportStream *rs, int timeout)
+void testcase::handler_install(ReportStream &rs, int timeout)
 {
-  report_stream = rs;
-  set_terminate(handle_terminate);
-  signal(SIGFPE,handle_sigfpe);
-  signal(SIGSEGV,handle_sigsegv);
-  signal(SIGUSR1,handle_sigusr1);
+  backtrace_exception([&rs](const ErrorInfo& info, const exception& e){
+    stringstream ss;
+    switch (info.eno) {
+    case ErrorInfo::ESEGV:
+      ss << "Segmenation Fault";
+      break;
+    case ErrorInfo::EFPE:
+      ss << "Invalid Arithmetic Operation";
+      break;
+    case ErrorInfo::EILL:
+      ss << "Illegal Instruction";
+      break;
+    case ErrorInfo::EBUS:
+      ss << "Segmenation Fault";
+      break;
+    case ErrorInfo::ETERM:
+      ss << "Terminate";
+      break;
+    case ErrorInfo::EEXP:
+      {
+        const Assert::Error* a = dynamic_cast<const Assert::Error*>(&e);
+        if (a) {
+          rs << a->info();
+          quick_exit(EXIT_FAILURE);
+        }
+      }
+      ss << "Uncaugh Exception: " << e.what() << " (" << demangle(typeid(e)) << ")";
+      break;
+    case ErrorInfo::EUNKNOWN:
+      ss << "Unknown Exception";
+      break;
+    };
+    rs << TestInfo::error(ss.str()).backtrace(sbacktrace(info.depth,backtrace_top));
+    quick_exit(EXIT_FAILURE);
+  });
   if (timeout) {
-    thread t([timeout]{
+    thread t([&rs,timeout]{
       this_thread::sleep_for(chrono::milliseconds(timeout));
-      raise(SIGUSR1);
+      rs << TestInfo::timeout();
+      quick_exit(EXIT_FAILURE);
     });
     t.detach();
   }
 }
 
+bool testcase::pdiff(const vector<int> &d)
+{
+  return all_of(d.begin(),d.end(),[](int i){ return i == 0; });
+}
+
 void testcase::synchronize(const TestCase::AsyncCase &f)
 {
-  bool done = false;;
+  backtrace_top = backtrace_depth();
+  bool done = false;
   mutex done_mutex, wait_mutex;
   condition_variable condition;
 

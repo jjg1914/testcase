@@ -25,13 +25,19 @@ void TestCase::operator()(const std::string &name, int timeout,
 {
   ReportStream rs;
   synchronize_on_fork([&f,&rs,timeout](){
-    handler_install(&rs, timeout);
+    rs.close_in();
+    handler_install(rs, timeout);
     synchronize(f);
     rs << TestInfo::passed();
   });
 
+  rs.close_out();
   TestInfo rval;
-  rs >> rval;
+  try {
+    rs >> rval;
+  } catch (ReportStream::EOFException e) {
+    rval = TestInfo::error("test terminated without reporting");
+  }
   runner(rval.test_case(name));
 }
 

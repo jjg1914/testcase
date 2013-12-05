@@ -6,6 +6,10 @@ using namespace std;
 using namespace __gnu_cxx;
 using namespace testcase;
 
+ReportStream::EOFException::EOFException()
+  : logic_error("EOF reached without a report")
+{}
+
 ReportStream::ReportStream()
   : p(),
     inbuff(p.in, ios::in),
@@ -33,6 +37,19 @@ ReportStream &ReportStream::operator>>(TestInfo &info)
   while (getline(in, line), !in.eof() && line != "") {
     buf += line + "\n";
   }
+  if (buf.empty()) {
+    throw EOFException();
+  }
   info = TestInfo::deserialize(buf);
   return *this;
+}
+
+void ReportStream::close_in()
+{
+  inbuff.close();
+}
+
+void ReportStream::close_out()
+{
+  outbuff.close();
 }

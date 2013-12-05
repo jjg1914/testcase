@@ -50,7 +50,7 @@ void TestRunner::Text(ostream &o)
     o << failure.suite() << "::" << failure.test_case() << endl;
     o << "  \e[36m";
     if (failure.status() == TestInfo::TIMEOUT) {
-      o << "Timeout";
+      o << "Timeout" << endl;
     } else {
       if (failure.status() == TestInfo::FAILED) {
         o << "Failure: ";
