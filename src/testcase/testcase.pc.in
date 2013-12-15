@@ -8,4 +8,4 @@ URL: https://github.com/jjg1914/testcase
 Version: 0.1.0
 Requires:
 Libs: -L${libdir} -ltestcase -rdynamic
-CFlags: -I${includedir} -std=c++11 -Og -fno-inline
+CFlags: -I${includedir} -std=c++11 -Og -fno-inline -Wno-pmf-conversions

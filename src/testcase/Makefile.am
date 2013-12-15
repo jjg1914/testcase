@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = libtestcase.la
 
 libtestcase_la_includedir = $(includedir)/testcase
-libtestcase_la_include_HEADERS =  Assert.h ReportStream.h testcase.h TestCase.h TestInfo.h TestRunner.h TestSuite.h util.h backtrace.h
+libtestcase_la_include_HEADERS =  Assert.h Mock.h ReportStream.h testcase.h TestCase.h TestInfo.h TestRunner.h TestSuite.h util.h backtrace.h
 
 libtestcase_la_pkgconfigdir = $(libdir)/pkgconfig
 libtestcase_la_pkgconfig_DATA = testcase.pc

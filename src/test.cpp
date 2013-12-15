@@ -6,6 +6,7 @@
 #include <chrono>
 
 #include "testcase/testcase.h"
+#include "testcase/Mock.h"
 
 using namespace std;
 using namespace testcase;
@@ -33,6 +34,37 @@ void throw_logic_error()
 void throw_int()
 {
   throw 1;
+}
+
+int mocked(int i) {
+  return i + 1;
+}
+
+void void_mocked(int& i) {
+  i = 2;
+}
+
+struct M {
+  int foo();
+  int foov() volatile;
+  int bar() const;
+  int barv() const volatile;
+};
+
+int M::foo() {
+  return 0;
+}
+
+int M::foov() volatile {
+  return 0;
+}
+
+int M::bar() const{
+  return 0;
+}
+
+int M::barv() const volatile {
+  return 0;
 }
 
 int main() {
@@ -240,6 +272,65 @@ int main() {
         cb();
       });
       t.detach();
+    });
+
+    test("test 43", []{
+      int j = 3;
+      MOCK(mocked,[j](int i) {
+        return i + j;
+      });
+      ASSERT_EQUAL(5,mocked(2));
+    });
+
+    test("test 44", []{
+      int j = 3;
+      {
+        MOCK(mocked,[j](int i) {
+          return i + j;
+        });
+      }
+      ASSERT_EQUAL(3,mocked(2));
+    });
+
+    test("test 45", []{
+      int i = 0;
+      MOCK(void_mocked,[](int& j){
+        j = 3;
+      });
+      void_mocked(i);
+      ASSERT_EQUAL(3,i);
+    });
+
+    test("test 46", []{
+      MOCK(&M::foo, [](M* m){
+        return 1;
+      });
+      M m;
+      ASSERT_TRUE(m.foo());
+    });
+
+    test("test 47", []{
+      MOCK(&M::foov, [](volatile M* m){
+        return 1;
+      });
+      M m;
+      ASSERT_TRUE(m.foov());
+    });
+
+    test("test 48", []{
+      MOCK(&M::bar, [](const M* m){
+        return 1;
+      });
+      M m;
+      ASSERT_TRUE(m.bar());
+    });
+
+    test("test 49", []{
+      MOCK(&M::barv, [](const volatile M* m){
+        return 1;
+      });
+      M m;
+      ASSERT_TRUE(m.barv());
     });
   });
 
