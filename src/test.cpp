@@ -7,6 +7,7 @@
 
 #include "testcase/testcase.h"
 #include "testcase/Mock.h"
+#include <cstdint>
 
 using namespace std;
 using namespace testcase;
@@ -49,6 +50,7 @@ struct M {
   int foov() volatile;
   int bar() const;
   int barv() const volatile;
+  virtual int vbaz();
 };
 
 int M::foo() {
@@ -64,6 +66,10 @@ int M::bar() const{
 }
 
 int M::barv() const volatile {
+  return 0;
+}
+
+int M::vbaz() {
   return 0;
 }
 
@@ -331,6 +337,14 @@ int main() {
       });
       M m;
       ASSERT_TRUE(m.barv());
+    });
+
+    test("test 50", []{
+      M m;
+      MOCK(&M::vbaz, [](M* m){
+        return 1;
+      });
+      ASSERT_TRUE(m.vbaz());
     });
   });
 

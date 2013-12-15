@@ -16,53 +16,22 @@
   _MOCK(__COUNTER__,p,f)
 
 #define _MOCK(i,p,f)\
-  _Mock<i,decltype(p)> _mock ## i(p,f)
+  _Mock<i,decltype(p)> _mock ## i((_Mock<i,decltype(p)>::Stateless) p,f)
 
 namespace testcase {
 
-  template<int U,typename T>
-  struct _MockInfo;
+  template<int U, typename T>
+  class _Mock;
 
   template<int U, typename R, typename... T>
-  struct _MockInfo<U,R(T...)>{
-    using Stateless = R(*)(T...);
-    using Stateful = R(T...);
-    using Source = Stateless;
-
-    static R stateless(T... t);
-    static std::function<Stateful> stateful;
-  };
-
-  template<int U, typename R, typename C, typename... T>
-  struct _MockInfo<U,R (C::*)(T...)> : public _MockInfo<U,R(C*,T...)> {
-    using Source = R(C::*)(T...);
-  };
-
-  template<int U, typename R, typename C, typename... T>
-  struct _MockInfo<U,R (C::*)(T...) const> : public _MockInfo<U,R(const C*,T...)> {
-    using Source = R(C::*)(T...) const;
-  };
-
-  template<int U, typename R, typename C, typename... T>
-  struct _MockInfo<U,R (C::*)(T...) volatile> : public _MockInfo<U,R(volatile C*,T...)> {
-    using Source = R(C::*)(T...) volatile;
-  };
-
-  template<int U, typename R, typename C, typename... T>
-  struct _MockInfo<U,R (C::*)(T...) const volatile> : public _MockInfo<U,R(const volatile C*,T...)> {
-    using Source = R(C::*)(T...) const volatile;
-  };
-
-  template<int U, typename T>
-  class _Mock {
+  class _Mock<U,R(T...)> {
 
     public:
 
-    using Stateless = typename _MockInfo<U,T>::Stateless;
-    using Stateful = typename _MockInfo<U,T>::Stateful;
-    using Source = typename _MockInfo<U,T>::Source;
+    using Stateless = R(*)(T...);
+    using Stateful = std::function<R(T...)>;
 
-    _Mock(Source p, const std::function<Stateful>& f);
+    _Mock(Stateless p, const Stateful& f);
 
     ~_Mock();
 
@@ -75,29 +44,69 @@ namespace testcase {
     intptr_t pagesize;
 
     intptr_t pageaddr;
+
+    static R stateless(T... t);
+
+    static Stateful stateful;
+  };
+
+  template<int U, typename R, typename C, typename... T>
+  struct _Mock<U,R (C::*)(T...)>
+    : public _Mock<U,R(C*,T...)> {
+    using Super = _Mock<U,R(C*,T...)>;
+    public:
+    _Mock(typename Super::Stateless p,
+      const typename Super::Stateful& f) : Super(p,f) {}
+  };
+
+  template<int U, typename R, typename C, typename... T>
+  struct _Mock<U, R (C::*)(T...) const>
+    : public _Mock<U, R(const C*,T...)> {
+    using Super = _Mock<U,R(const C*,T...)>;
+    public:
+    _Mock(typename Super::Stateless p,
+      const typename Super::Stateful& f) : Super(p,f) {}
+  };
+
+  template<int U, typename R, typename C, typename... T>
+  struct _Mock<U, R (C::*)(T...) volatile>
+    : public _Mock<U, R(volatile C*,T...)> {
+    using Super = _Mock<U,R(volatile C*,T...)>;
+    public:
+    _Mock(typename Super::Stateless p,
+      const typename Super::Stateful& f) : Super(p,f) {}
+  };
+
+  template<int U, typename R, typename C, typename... T>
+  struct _Mock<U, R (C::*)(T...) const volatile>
+    : public _Mock<U, R(const volatile C*,T...)> {
+    using Super = _Mock<U,R(const volatile C*,T...)>;
+    public:
+    _Mock(typename Super::Stateless p,
+      const typename Super::Stateful& f) : Super(p,f) {}
   };
 }
 
 template<int U, typename R, typename... T>
-R testcase::_MockInfo<U,R(T...)>::stateless(T... t)
+R testcase::_Mock<U,R(T...)>::stateless(T... t)
 {
   return stateful(t...);
 }
 
 template<int U, typename R, typename... T>
-std::function<typename testcase::_MockInfo<U,R(T...)>::Stateful>
-  testcase::_MockInfo<U,R(T...)>::stateful;
+typename testcase::_Mock<U,R(T...)>::Stateful
+  testcase::_Mock<U,R(T...)>::stateful;
 
-template<int U, typename T>
-testcase::_Mock<U,T>::_Mock(Source p, const std::function<Stateful>& f)
-  : addr((Stateless) p),
+template<int U, typename R, typename... T>
+testcase::_Mock<U,R(T...)>::_Mock(Stateless p, const Stateful& f)
+  : addr(p),
     pagesize(sysconf(_SC_PAGE_SIZE)),
     pageaddr((((intptr_t) addr) / pagesize) * pagesize)
 {
-  _MockInfo<U,T>::stateful = f;
+  stateful = f;
 
   unsigned char newop[5] = { 0xE9 };
-  *(int32_t*)(newop + 1) = ((char*) _MockInfo<U,T>::stateless) - ((char*) addr) - 5;
+  *(int32_t*)(newop + 1) = ((char*) stateless) - ((char*) addr) - 5;
 
   if (mprotect((void*) pageaddr, pagesize,
     PROT_READ | PROT_WRITE | PROT_EXEC)) {
@@ -112,8 +121,8 @@ testcase::_Mock<U,T>::_Mock(Source p, const std::function<Stateful>& f)
   }
 }
 
-template<int U, typename T>
-testcase::_Mock<U,T>::~_Mock()
+template<int U, typename R, typename... T>
+testcase::_Mock<U,R(T...)>::~_Mock()
 {
   if (mprotect((void*) pageaddr, pagesize,
     PROT_READ | PROT_WRITE | PROT_EXEC)) {
