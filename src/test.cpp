@@ -346,6 +346,17 @@ int main() {
       });
       ASSERT_TRUE(m.vbaz());
     });
+
+    test("test 51", []{
+      M m;
+      MOCK(&M::vbaz, [](M* m){
+        return 1;
+      });
+      MOCK(&M::foo, [](M* m){
+        return 1;
+      });
+      ASSERT_TRUE(m.vbaz());
+    });
   });
 
   TestRunner::Text();
