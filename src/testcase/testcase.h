@@ -4,5 +4,6 @@
 #include "testcase/TestRunner.h"
 #include "testcase/TestSuite.h"
 #include "testcase/Assert.h"
+#include "testcase/Mock.h"
 
 #endif
