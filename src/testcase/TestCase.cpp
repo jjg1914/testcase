@@ -43,6 +43,9 @@ void TestCase::operator()(const std::string &name, int timeout,
   } catch (ReportStream::EOFException e) {
     rval = TestInfo::error("test terminated without reporting");
   }
+  if (!rval.status() && !rval.asserts()) {
+    rval = rval.status(TestInfo::WARNING).what("No Assertions");
+  }
   runner(rval.test_case(name));
 }
 

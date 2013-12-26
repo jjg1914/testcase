@@ -359,6 +359,8 @@ int main() {
     });
 
     test("test 51");
+
+    test("test 52", []{});
   });
 
   TestRunner::Text();
