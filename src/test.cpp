@@ -346,6 +346,17 @@ int main() {
       });
       ASSERT_TRUE(m.vbaz());
     });
+
+    test("test 51", []{
+      MOCK(&M::foo, [](M* m){
+        return 1;
+      });
+      MOCK(&M::bar, [](const M* m){
+        return 1;
+      });
+      M m;
+      ASSERT_TRUE(m.foo() && m.bar());
+    });
   });
 
   TestRunner::Text();

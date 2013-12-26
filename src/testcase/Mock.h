@@ -12,11 +12,14 @@
 #include <system_error>
 #include <type_traits>
 
+#define MOCK_ID(i)\
+  _mock ## i
+
 #define MOCK(p,f)\
   _MOCK(__COUNTER__,p,f)
 
 #define _MOCK(i,p,f)\
-  _Mock<i,decltype(p)> _mock ## i((_Mock<i,decltype(p)>::Stateless) p,f)
+  _Mock<i,decltype(p)> MOCK_ID(i)((_Mock<i,decltype(p)>::Stateless) p,f)
 
 namespace testcase {
 
