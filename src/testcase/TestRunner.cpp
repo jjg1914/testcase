@@ -18,7 +18,8 @@ void TestRunner::Text(ostream &o)
     int num_errors;
     int num_asserts;
     int num_timeouts;
-  } counts = { 0, 0, 0, 0 ,0 };
+    int num_skips;
+  } counts = { 0, 0, 0, 0 ,0, 0 };
   o << "\e[1m";
   o.flush();
   TestSuite::run([&o,&failures,&counts](const TestInfo& info){
@@ -30,6 +31,9 @@ void TestRunner::Text(ostream &o)
       } else if (info.status() == TestInfo::TIMEOUT) {
         o << "\e[36mT";
         ++counts.num_timeouts;
+      } else if (info.status() == TestInfo::SKIP) {
+        o << "\e[36mS";
+        ++counts.num_skips;
       } else {
         o << "\e[36mE";
         ++counts.num_errors;
@@ -51,6 +55,8 @@ void TestRunner::Text(ostream &o)
     o << "  \e[36m";
     if (failure.status() == TestInfo::TIMEOUT) {
       o << "Timeout" << endl;
+    } else if (failure.status() == TestInfo::SKIP) {
+      o << "Skip" << endl;
     } else {
       if (failure.status() == TestInfo::FAILED) {
         o << "Failure: ";
@@ -95,6 +101,7 @@ void TestRunner::Text(ostream &o)
   o << "\e[31m" << counts.num_fails << " failures, ";
   o << "\e[36m" << counts.num_errors << " errors, ";
   o << "\e[36m" << counts.num_timeouts << " timeouts, ";
+  o << "\e[36m" << counts.num_skips << " skips, ";
   o << "\e[34m" << counts.num_asserts << " asserts";
   o << "\e[0m" << endl;
 }

@@ -357,6 +357,8 @@ int main() {
       M m;
       ASSERT_TRUE(m.foo() && m.bar());
     });
+
+    test("test 51");
   });
 
   TestRunner::Text();

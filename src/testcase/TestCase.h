@@ -21,6 +21,8 @@ namespace testcase {
 
     TestCase(const Runner &f);
 
+    void operator()(const std::string &name) const;
+
     void operator()(const std::string &name, const AsyncCase &f) const;
 
     void operator()(const std::string &name, const SyncCase &f) const;
