@@ -1,11 +1,13 @@
 #include <vector>
 #include <sstream>
+#include <chrono>
 
 #include "testcase/TestSuite.h"
 
 #include "testcase/TestRunner.h"
 
 using namespace std;
+using namespace std::chrono;
 using namespace testcase;
 
 void TestRunner::Text(ostream &o)
@@ -23,6 +25,7 @@ void TestRunner::Text(ostream &o)
   } counts = { 0, 0, 0, 0 ,0, 0, 0 };
   o << "\e[1m";
   o.flush();
+  auto start_time = system_clock::now();
   TestSuite::run([&o,&failures,&counts](const TestInfo& info){
     ++counts.num_tests;
     if (info.status()) {
@@ -50,6 +53,7 @@ void TestRunner::Text(ostream &o)
     counts.num_asserts += info.asserts();
     o.flush();
   });
+  auto ellapsed = system_clock::now() - start_time;
   o << endl << endl;
 
   int i = 0;
@@ -110,5 +114,8 @@ void TestRunner::Text(ostream &o)
   o << "\e[36m" << counts.num_warnings << " warnings, ";
   o << "\e[36m" << counts.num_timeouts << " timeouts, ";
   o << "\e[36m" << counts.num_skips << " skips";
+  o << endl;
+  o << "\e[35m" << duration_cast<milliseconds>(ellapsed).count() << " ms ellapsed, ";
+  o << "\e[35m" << duration_cast<milliseconds>(ellapsed).count()/counts.num_tests  << " ms/test (average)";
   o << "\e[0m" << endl;
 }
