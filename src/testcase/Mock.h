@@ -12,6 +12,9 @@
 #include <system_error>
 #include <type_traits>
 
+#define MOCK_ID(i)\
+  _mock ## i
+
 #define MOCK(p,f)\
   _MOCK(__COUNTER__,p,f)
 

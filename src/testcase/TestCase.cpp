@@ -10,6 +10,11 @@ TestCase::TestCase(const TestCase::Runner &f)
   : runner(f)
 {}
 
+void TestCase::operator()(const std::string &name) const
+{
+  runner(TestInfo().test_case(name).status(TestInfo::SKIP));
+}
+
 void TestCase::operator()(const string &name, const AsyncCase &f) const
 {
   operator()(name,0,f);
@@ -37,6 +42,9 @@ void TestCase::operator()(const std::string &name, int timeout,
     rs >> rval;
   } catch (ReportStream::EOFException e) {
     rval = TestInfo::error("test terminated without reporting");
+  }
+  if (!rval.status() && !rval.asserts()) {
+    rval = rval.status(TestInfo::WARNING).what("No Assertions");
   }
   runner(rval.test_case(name));
 }

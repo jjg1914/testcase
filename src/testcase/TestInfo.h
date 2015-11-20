@@ -13,7 +13,9 @@ namespace testcase {
       PASSED = 0,
       FAILED,
       ERROR,
-      TIMEOUT
+      TIMEOUT,
+      WARNING,
+      SKIP
     };
 
     static TestInfo passed();

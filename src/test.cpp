@@ -349,14 +349,19 @@ int main() {
 
     test("test 51", []{
       M m;
-      MOCK(&M::vbaz, [](M* m){
-        return 1;
-      });
       MOCK(&M::foo, [](M* m){
         return 1;
       });
-      ASSERT_TRUE(m.vbaz());
+      MOCK(&M::bar, [](const M* m){
+        return 1;
+      });
+      M m;
+      ASSERT_TRUE(m.foo() && m.bar());
     });
+
+    test("test 51");
+
+    test("test 52", []{});
   });
 
   TestRunner::Text();
